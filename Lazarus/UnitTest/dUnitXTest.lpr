@@ -102,11 +102,11 @@ begin
       S := '';
       S:=GetOptionValue('suite');
       if S = '' then
-        for I := 0 to GetTestRegistry.Tests.count - 1 do
-          writeln(GetTestRegistry[i].TestName)
+        for I := 0 to GetTestRegistry.GetChildTestCount - 1 do
+          writeln(GetTestRegistry.Test[i].TestName)
       else
-      for I := 0 to GetTestRegistry.Tests.count - 1 do
-        if GetTestRegistry[i].TestName = S then
+      for I := 0 to GetTestRegistry.GetChildTestCount - 1 do
+        if GetTestRegistry.Test[i].TestName = S then
         begin
           doTestRun(GetTestRegistry[i]);
         end;

@@ -24,7 +24,6 @@ type
       procedure IsTrue(ACondition: boolean; const AMessage: string);
       procedure AreEqual(Expected, Actual: string; something:boolean);
       procedure Contains(HayStack,Needle: string; something:boolean);
-      procedure AllDataMatrixCode();
     public
       function GetImage(Filename: string): TBitmap;
       function Decode(out aResult:TReadResult; const Filename: String; const CodeFormat: TBarcodeFormat;
@@ -36,6 +35,7 @@ type
       procedure AllUpcE;
       procedure AllQRCode;
       procedure All_PURE_QRCode;
+      procedure AllDataMatrixCode();
       procedure AllCode128();
       procedure AllCode93();
       procedure AllCodeITF;
@@ -667,6 +667,7 @@ var
 begin
  try
 
+   {
    aFile:='DatamatrixHiddenInBottom.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
@@ -676,6 +677,7 @@ begin
       'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
      FreeAndNil(aScanresult);
    end;
+   }
 
    aFile:='dmc1.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
@@ -713,6 +715,7 @@ begin
      FreeAndNil(aScanresult);
    end;
 
+   {
    aFile:='dmc4.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
@@ -722,6 +725,7 @@ begin
      'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
      FreeAndNil(aScanresult);
    end;
+   }
 
    aFile:='dmc5.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
@@ -1175,8 +1179,6 @@ begin
         FreeAndNil(aScanresult);
       end;
 
-      {
-      // Does not work [yet] with TBarcodeFormat.Auto !!
       success := Decode(aScanResult,'dmc7.png', TBarcodeFormat.Auto);
       if success then
       begin
@@ -1185,7 +1187,6 @@ begin
            'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
         FreeAndNil(aScanresult);
       end;
-      }
 
       success := Decode(aScanResult,'upca.png', TBarcodeFormat.Auto);
       if success then
