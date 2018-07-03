@@ -24,12 +24,20 @@ type
   PARGB = ^TARGB;
   TARGB = packed record
     case Byte of
+      1: (A, R, G, B: Byte);
+      2: (Color: LongWord);
+  end;
+  PARGBArray = ^TARGBArray;
+  TARGBArray = array[0..0] of TARGB;
+
+  PBGRA = ^TBGRA;
+  TBGRA = packed record
+    case Byte of
       1: (B, G, R, A: Byte);
       2: (Color: LongWord);
   end;
-
-  PARGBArray = ^TARGBArray;
-  TARGBArray = array[0..0] of TARGB;
+  PBGRAArray = ^TBGRAArray;
+  TBGRAArray = array[0..0] of TBGRA;
 
   PRGB = ^TRGB;
   TRGB = packed record
@@ -52,6 +60,7 @@ type
   end;
 
   function CodecToARGB(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
+  function CodecToBGRA(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
   function ARGBToCodec(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
 
   function Conv15To32(Color: Word): LongWord; overload;
@@ -91,6 +100,25 @@ begin
   else
     Result:=False;
   end;
+end;
+
+function CodecToBGRA(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
+begin
+  Result:=True;
+  {
+  case Codec of
+    BI_RGB: case BitCount of
+              16: Conv16To32(src, dest, Width, Height);
+              24: Conv24To32(src, dest, Width, Height);
+              32: Move(src^, dest^, Width*Height*4);
+            end;
+    UYVY: UYVYtoARGB(src, dest, Width, Height);
+    YUY2: YUY2toARGB(src, dest, Width, Height);
+    I420: I420toARGB(src, dest, Width, Height);
+  else
+    Result:=False;
+  end;
+  }
 end;
 
 function ARGBToCodec(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
