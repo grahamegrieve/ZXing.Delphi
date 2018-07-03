@@ -19,13 +19,24 @@
 
 unit ZXing.ResultPoint;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
+  SysUtils,
   ZXing.Common.Detector.MathUtils;
 
 type
+  {$ifndef FPC}
+  PtrInt = integer;
+  {$endif}
+
+  IResultPoint = interface;
+  TIResultPointArray=TArray<IResultPoint>;
+
   /// <summary>
   /// To mimic "garbage collection" (or ARC) with old-gen compilers we have to use
   /// interfaces. IResultPoint is the interface that maps TResultPoint which is now
@@ -44,7 +55,7 @@ type
     function GetY: Single;
 
     function Equals(other: TObject): Boolean;
-    function GetHashCode(): Integer;
+    function GetHashCode(): PtrInt;
     function ToString(): String;
 
     property x: Single read GetX write SetX;
@@ -58,12 +69,11 @@ type
   /// in place of the actual class constructor
   /// </summary>
   TResultPointHelpers = class
-    protected
-       /// <summary>
-       /// Returns the z component of the cross product between vectors BC and BA.
-       /// </summary>
-       class function crossProductZ(const pointA, pointB, pointC: IResultPoint): Single; static;
     public
+      /// <summary>
+      /// Returns the z component of the cross product between vectors BC and BA.
+      /// </summary>
+      class function crossProductZ(const pointA, pointB, pointC: IResultPoint): Single; static;
        /// <summary>
        /// Initializes a new instance of <see cref="TResultPoint"/> and returns
        /// its <see cref="IResultPoint"/> interface
@@ -81,7 +91,7 @@ type
        /// BC is less than AC and the angle between BC and BA is less than 180 degrees.
        /// </summary>
        /// <param name="patterns">array of three <see cref="IResultPoint" /> to order</param>
-       class procedure orderBestPatterns(const patterns : TArray<IResultPoint>); static;
+       class procedure orderBestPatterns(const patterns : TIResultPointArray); static;
        /// <summary>
        /// calculates the distance between two points
        /// </summary>
@@ -113,6 +123,7 @@ type
   end;
 
 implementation
+
 uses ZXing.ResultPointImplementation;
 
 class function TResultPointHelpers.CreateResultPoint:IResultPoint;
@@ -146,7 +157,7 @@ end;
 
 
 class procedure TResultPointHelpers.orderBestPatterns(const patterns
-  : TArray<IResultPoint>);
+  : TIResultPointArray);
 var
   zeroOneDistance, oneTwoDistance, zeroTwoDistance: Single;
   pointA, pointB, pointC, temp: IResultPoint;

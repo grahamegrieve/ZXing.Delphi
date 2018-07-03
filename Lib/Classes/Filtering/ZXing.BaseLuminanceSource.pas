@@ -19,15 +19,25 @@
 
 unit ZXing.BaseLuminanceSource;
 
-interface
-uses
-  System.SysUtils,
-  System.UITypes,
-{$IFDEF USE_VCL_BITMAP}
-  VCL.Graphics,
-{$ELSE}
-  FMX.Graphics,
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+  {$define USE_VCL_BITMAP}
 {$ENDIF}
+
+interface
+
+uses
+  SysUtils,
+  UITypes,
+  {$ifndef FPC}
+  {$IFDEF USE_VCL_BITMAP}
+  VCL.Graphics,
+  {$ELSE}
+  FMX.Graphics,
+  {$ENDIF}
+  {$else}
+  Graphics,
+  {$endif}
   ZXing.LuminanceSource,
   ZXing.InvertedLuminanceSource;
 
@@ -53,6 +63,7 @@ type
     // added the "reintroduce" keyword to shut off the "method hides another method with the same name in the base class"
     constructor Create(const width, height: Integer);  reintroduce; overload; 
     constructor Create(const luminanceArray: TArray<Byte>; const width, height: Integer);  reintroduce; overload;
+    destructor Destroy(); reintroduce; overload;
 
     function getRow(const y: Integer; row: TArray<Byte>): TArray<Byte>; override;
     function rotateCounterClockwise(): TLuminanceSource; override;
@@ -75,7 +86,7 @@ constructor TBaseLuminanceSource.Create(const width, height: Integer);
 begin
   inherited Create(width, height);
   
-  luminances := TArray<Byte>.Create();
+  luminances := TArray<Byte>.Create{$ifndef FPC}(){$endif};
   SetLength(luminances, (width * height));
 end;
 
@@ -87,9 +98,21 @@ end;
 /// <param name="height">The height.</param>
 constructor TBaseLuminanceSource.Create(const luminanceArray: TArray<Byte>; 
   const width, height: Integer);
+var
+  i:integer;
 begin
   Self.Create(width, height);
+  {$ifdef FPC}
+  for i:=0 to Length(luminances)-1 do luminanceArray[i]:=0;
+  {$else}
   Copy(luminanceArray, 0, Length(luminances));
+  {$endif}
+end;
+
+destructor TBaseLuminanceSource.Destroy;
+begin
+  luminances:=nil;
+  inherited;
 end;
 
 /// <summary>
@@ -113,7 +136,7 @@ begin
   if ((row = nil) or (Length(row) < width)) then
   begin
     row := nil;
-    row := TArray<Byte>.Create();
+    row := TArray<Byte>.Create{$ifndef FPC}(){$endif};
     SetLength(row, width);
   end;
 
@@ -144,7 +167,7 @@ var
   yold, ynew,
   xold, xnew : Integer;
 begin
-  rotatedLuminances := TArray<Byte>.Create();
+  rotatedLuminances := TArray<Byte>.Create{$ifndef FPC}(){$endif};
   SetLength(rotatedLuminances, (Width * Height));
 
   newWidth := Height;
@@ -208,7 +231,7 @@ begin
   then
      raise EArgumentException.Create('Crop rectangle does not fit within image data.');
 
-  croppedLuminances := TArray<Byte>.Create();
+  croppedLuminances := TArray<Byte>.Create{$ifndef FPC}(){$endif};
   SetLength(croppedLuminances, (width * height));
   oldLuminances := Self.Matrix;
   oldWidth := Self.Width;

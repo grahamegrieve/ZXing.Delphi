@@ -19,11 +19,15 @@
 
 unit ZXing.QrCode.Internal.BitMatrixParser;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses 
-  SysUtils, 
-  Generics.Collections, 
+uses
+  SysUtils,
+  Generics.Collections,
   ZXing.DecodeHintType,
   ZXing.Common.BitMatrix, 
   ZXing.QrCode.Internal.Version,
@@ -183,7 +187,7 @@ begin
 
   try
     readingUp := true;
-    Result := TArray<Byte>.Create();
+    Result := TArray<Byte>.Create{$ifndef FPC}(){$endif};
     SetLength(Result, version.TotalCodewords);
     resultOffset := 0;
     currentByte := 0;

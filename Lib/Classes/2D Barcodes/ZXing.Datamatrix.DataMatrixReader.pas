@@ -19,15 +19,19 @@
 
 unit ZXing.Datamatrix.DataMatrixReader;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
   ZXing.Common.Detector.MathUtils,
   Math,
   ZXing.Common.BitArray,
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.ReadResult,
   ZXing.Reader,
   ZXing.DecodeHintType,
@@ -47,7 +51,7 @@ type
   TDataMatrixReader = class(TInterfacedObject, IReader)
   private
     FDecoder: TDataMatrixDecoder;
-    NO_POINTS: TArray<IResultPoint>;
+    NO_POINTS: TIResultPointArray;
 
     /// <summary>
     /// This method detects a code in a "pure" image -- that is, pure monochrome image
@@ -71,12 +75,13 @@ type
     function decode(const image: TBinaryBitmap): TReadResult; overload;
 
     function decode(const image: TBinaryBitmap;
-      hints: TDictionary<TDecodeHintType, TObject>): TReadResult; overload;
+      hints: THints): TReadResult; overload;
 
     procedure reset;
   end;
 
 implementation
+
 uses ZXing.ByteSegments;
 
 { TDataMatrixReader }
@@ -85,7 +90,7 @@ constructor TDataMatrixReader.Create;
 begin
   inherited;
   FDecoder := TDataMatrixDecoder.Create;
-  NO_POINTS := TArray<IResultPoint>.Create();
+  NO_POINTS := TIResultPointArray.Create{$ifndef FPC}(){$endif};
 end;
 
 destructor TDataMatrixReader.Destroy;
@@ -101,11 +106,11 @@ begin
 end;
 
 function TDataMatrixReader.decode(const image: TBinaryBitmap;
-  hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  hints: THints): TReadResult;
 var
   matrixDetector: TDataMatrixDetector;
   DecoderResult: TDecoderResult;
-  points: TArray<IResultPoint>;
+  points: TIResultPointArray;
   bits: TBitMatrix;
   DetectorResult: TDetectorResult;
   ByteSegments: IByteSegments;

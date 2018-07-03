@@ -17,24 +17,32 @@ unit ZXing.Helpers;
 
   * Implemented by E. Spelt for Delphi
 }
+
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 type
+  TIntegerArray = TArray<Integer>;
+
   TArray = class
-    class function Clone(original: TArray<Integer>): TArray<Integer>; static;
-    class function CopyInSameArray(const Input: TArray<Integer>;
-      StartIndex: Integer; Len: Integer): TArray<Integer>; static;
+    class function Clone(original: TIntegerArray): TIntegerArray; static;
+    class function CopyInSameArray(const Input: TIntegerArray;
+      StartIndex: Integer; Len: Integer): TIntegerArray; static;
+    class procedure Copy(const Source: TIntegerArray; var Target: TIntegerArray; SI, DI, Cnt: integer); static;
   end;
 
 implementation
 
-class function TArray.Clone(original: TArray<Integer>): TArray<Integer>;
+class function TArray.Clone(original: TIntegerArray): TIntegerArray;
 var
   i: Integer;
   l: SmallInt;
 begin
   l := Length(original);
-  Result := TArray<Integer>.Create();
+  Result := TIntegerArray.Create{$ifndef FPC}(){$endif};
   SetLength(Result, l);
 
   for i := 0 to l - 1 do
@@ -43,8 +51,8 @@ begin
   end;
 end;
 
-class function TArray.CopyInSameArray(const Input: TArray<Integer>;
-  StartIndex: Integer; Len: Integer): TArray<Integer>;
+class function TArray.CopyInSameArray(const Input: TIntegerArray;
+  StartIndex: Integer; Len: Integer): TIntegerArray;
 var
   i, y: Integer;
 begin
@@ -57,6 +65,11 @@ begin
     inc(y);
   end;
 
+end;
+
+class procedure TArray.Copy(const Source: TIntegerArray; var Target: TIntegerArray; SI, DI, Cnt: integer);
+begin
+  System.Move(Pointer(@Source[SI])^, Pointer(@Target[DI])^, Cnt * SizeOf(Integer));
 end;
 
 end.

@@ -19,13 +19,17 @@
 
 unit ZXing.QrCode.Internal.DecodedBitStreamParser;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses 
-  ZXing.BitSource,
-  SysUtils, 
-  ZXing.DecodeHintType,
+uses
+  SysUtils,
   Generics.Collections,
+  ZXing.BitSource,
+  ZXing.DecodeHintType,
   ZXing.QrCode.Internal.ErrorCorrectionLevel,
   ZXing.QrCode.Internal.Version,
   ZXing.DecoderResult,
@@ -62,7 +66,7 @@ type
       const res: TStringBuilder; count: Integer;
       const currentCharacterSetECI: TCharacterSetECI;
       const byteSegments: IByteSegments;
-      const hints: TDictionary<TDecodeHintType, TObject>): Boolean; static;
+      const hints: THints): Boolean; static;
 
     /// <summary>
     /// See specification GBT 18284-2000
@@ -85,7 +89,7 @@ type
   public
     class function decode(const bytes: TArray<Byte>; const version: TVersion;
       const ecLevel: TErrorCorrectionLevel;
-      const hints: TDictionary<TDecodeHintType, TObject>): TDecoderResult; static;
+      const hints: THints): TDecoderResult; static;
   end;
 
 implementation
@@ -107,7 +111,7 @@ end;
 
 class function TDecodedBitStreamParser.decode(const bytes: TArray<Byte>;
   const version: TVersion; const ecLevel: TErrorCorrectionLevel;
-  const hints: TDictionary<TDecodeHintType, TObject>): TDecoderResult;
+  const hints: THints): TDecoderResult;
 var
   Mode: TMode;
   bits: TBitSource;
@@ -124,7 +128,7 @@ begin
   Result := nil;
 
   bits := TBitSource.Create(bytes);
-  res := TStringBuilder.Create(50);
+  res := TStringBuilder.Create(500);
   byteSegments := ByteSegmentsCreate();
   byteSegments.Capacity := 1;
   symbolSequence := -1;
@@ -330,7 +334,7 @@ class function TDecodedBitStreamParser.decodeByteSegment(const bits: TBitSource;
   const res: TStringBuilder; count: Integer;
   const currentCharacterSetECI: TCharacterSetECI;
   const byteSegments: IByteSegments;
-  const hints: TDictionary<TDecodeHintType, TObject>): Boolean;
+  const hints: THints): Boolean;
 var
   Enc:TEncoding;
   encodingS, s: string;
@@ -343,7 +347,7 @@ begin
   then
      exit;
 
-  readBytes := TArray<Byte>.Create();
+  readBytes := TArray<Byte>.Create{$ifndef FPC}(){$endif};
   SetLength(readBytes, count);
   for i := 0 to Pred(count) do
     readBytes[i] := Byte(bits.readBits(8));
@@ -391,7 +395,7 @@ begin
 
   // Each character will require 2 bytes. Read the characters as 2-byte pairs
   // and decode as GB2312 afterwards
-  buffer := TArray<Byte>.Create();
+  buffer := TArray<Byte>.Create{$ifndef FPC}(){$endif};
   SetLength(buffer, 2 * count);
   offset := 0;
 
@@ -439,7 +443,7 @@ begin
 
   // Each character will require 2 bytes. Read the characters as 2-byte pairs
   // and decode as Shift_JIS afterwards
-  buffer := TArray<Byte>.Create();
+  buffer := TArray<Byte>.Create{$ifndef FPC}(){$endif};
   SetLength(buffer, 2 * count);
   offset := 0;
 

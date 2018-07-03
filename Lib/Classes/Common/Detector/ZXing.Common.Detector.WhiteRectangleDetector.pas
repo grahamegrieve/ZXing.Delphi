@@ -19,10 +19,14 @@
 
 unit ZXing.Common.Detector.WhiteRectangleDetector;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
+  SysUtils,
   ZXing.Common.BitMatrix,
   ZXing.Common.Detector.MathUtils,
   ZXing.ResultPoint;
@@ -45,7 +49,7 @@ type
     constructor Create(image: TBitMatrix; initSize: Integer; x: Integer;
       y: Integer); overload;
     function centerEdges(y: IResultPoint; z: IResultPoint; x: IResultPoint;
-      t: IResultPoint): TArray<IResultPoint>;
+      t: IResultPoint): TIResultPointArray;
     function containsBlackPoint(a: Integer; b: Integer; fixed: Integer;
       horizontal: boolean): boolean;
     function getBlackPointOnSegment(aX: Single; aY: Single; bX: Single;
@@ -54,7 +58,7 @@ type
     class function New(image: TBitMatrix): TWhiteRectangleDetector; overload;
     class function New(image: TBitMatrix; initSize: Integer; x: Integer;
       y: Integer): TWhiteRectangleDetector; overload; static;
-    function detect(): TArray<IResultPoint>;
+    function detect(): TIResultPointArray;
   end;
 
 implementation
@@ -82,7 +86,7 @@ begin
 end;
 
 function TWhiteRectangleDetector.centerEdges(y: IResultPoint; z: IResultPoint;
-  x: IResultPoint; t: IResultPoint): TArray<IResultPoint>;
+  x: IResultPoint; t: IResultPoint): TIResultPointArray;
 var
   yi, yj, zi, zj, xi, xj, ti, tj: Single;
 begin
@@ -97,13 +101,13 @@ begin
 
   if (yi < (Self.width div 2)) then
   begin
-    Result := TArray<IResultPoint>.Create(TResultPointHelpers.CreateResultPoint((ti - 1), (tj + 1)
+    Result := TIResultPointArray.Create(TResultPointHelpers.CreateResultPoint((ti - 1), (tj + 1)
       ), TResultPointHelpers.CreateResultPoint((zi + 1), (zj + 1)), TResultPointHelpers.CreateResultPoint((xi - 1),
       (xj - 1)), TResultPointHelpers.CreateResultPoint((yi + 1), (yj - 1)));
     exit;
   end;
 
-  Result := TArray<IResultPoint>.Create(TResultPointHelpers.CreateResultPoint((ti + 1), (tj + 1)),
+  Result := TIResultPointArray.Create(TResultPointHelpers.CreateResultPoint((ti + 1), (tj + 1)),
     TResultPointHelpers.CreateResultPoint((zi + 1), (zj - 1)), TResultPointHelpers.CreateResultPoint((xi - 1),
     (xj + 1)), TResultPointHelpers.CreateResultPoint((yi - 1), (yj - 1)));
 
@@ -181,7 +185,7 @@ begin
   end;
 end;
 
-function TWhiteRectangleDetector.detect: TArray<IResultPoint>;
+function TWhiteRectangleDetector.detect: TIResultPointArray;
 var
   left, right, up, down: Integer;
   sizeExceeded, aBlackPointFoundOnBorder, atLeastOneBlackPointFoundOnBorder,

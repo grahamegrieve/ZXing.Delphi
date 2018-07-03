@@ -121,6 +121,14 @@ __recovery/
 [Dd]ebug*/
 [Rr]elease*/
 
+# FPC compiler-generated binaries (safe to delete)
+*.ppu
+*.lps
+*.or
+*.compiled
+backup/
+libscompiled/
+binscompiled/
 
 ### Visual Studio ###
 *.pdb

@@ -18,18 +18,22 @@ unit ZXing.OneD.Code39Reader;
   * Implemented by Nano103 and E. Spelt for Delphi
 }
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
   Math,
   ZXing.OneD.OneDReader,
   ZXing.Common.BitArray,
   ZXing.ReadResult,
   ZXing.DecodeHintType,
   ZXing.ResultPoint,
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.Common.Detector.MathUtils;
 
 type
@@ -41,7 +45,7 @@ type
     class function decodeExtended(encoded: string): string; static;
 
     function findAsteriskPattern(row: IBitArray): TArray<Integer>;
-    class function patternToChar(pattern: Integer; var c: Char)
+    class function patternToChar(pattern: Integer; out c: Char)
       : boolean; static;
     class function toNarrowWidePattern(counters: TArray<Integer>)
       : Integer; static;
@@ -58,7 +62,7 @@ type
     extendedMode: boolean;
   public
     function decodeRow(const rowNumber: Integer; const row: IBitArray;
-      const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+      const hints: THints): TReadResult;
       override;
 
     constructor Create(AUsingCheckDigit, AExtendedMode: boolean);
@@ -83,7 +87,7 @@ begin
 
   ASTERISK_ENCODING := TCode39Reader.CHARACTER_ENCODINGS[$27];
 
-  counters := TArray<Integer>.Create();
+  counters := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(counters, 9);
   decodeRowResult := TStringBuilder.Create();
   usingCheckDigit := AUsingCheckDigit;
@@ -192,7 +196,7 @@ begin
 end;
 
 function TCode39Reader.decodeRow(const rowNumber: Integer; const row: IBitArray;
-  const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  const hints: THints): TReadResult;
 var
   decodedChar: Char;
   lastStart: Integer;
@@ -200,7 +204,7 @@ var
   start: TArray<Integer>;
   resultString: String;
   Left, Right: Single;
-  resultPoints: TArray<IResultPoint>;
+  resultPoints: TIResultPointArray;
   resultPointLeft, resultPointRight: IResultPoint;
   whiteSpaceAfterEnd: Integer;
   i, max, total: Integer;
@@ -210,7 +214,8 @@ begin
     counters[index] := 0;
   end;
 
-  decodeRowResult.length := 0;
+  //self.decodeRowResult.length := 0;
+  self.decodeRowResult.Clear;
 
   start := self.findAsteriskPattern(row);
   if (start = nil) then
@@ -240,7 +245,10 @@ begin
       exit
     end;
 
-    self.decodeRowResult.Append(decodedChar);
+    {$ifdef FPC}
+    if decodedChar <> '*' then
+    {$endif}
+      self.decodeRowResult.Append(decodedChar);
     lastStart := nextStart;
 
     for counter in self.counters do
@@ -252,7 +260,9 @@ begin
 
   until (decodedChar = '*');
 
+  {$ifndef FPC}
   self.decodeRowResult.Remove((self.decodeRowResult.length - 1), 1);
+  {$endif}
 
   lastPatternSize := 0;
 
@@ -285,6 +295,8 @@ begin
     end;
 
     self.decodeRowResult.Remove(max, self.decodeRowResult.length);
+    //counter:=(self.decodeRowResult.length);
+    //if (counter>0) then self.decodeRowResult.Remove(max, counter);
   end;
 
   if (self.decodeRowResult.length = 0) then
@@ -382,7 +394,7 @@ begin
 end;
 
 class function TCode39Reader.patternToChar(pattern: Integer;
-  var c: Char): boolean;
+  out c: Char): boolean;
 var
   i: Integer;
 begin

@@ -19,7 +19,15 @@
 
 unit ZXing.DecodeHintType;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
+
+uses
+  Generics.Collections,
+  ZXing.BarCodeFormat;
 
 type
   TDecodeHintType = (
@@ -121,6 +129,10 @@ type
     /// </summary>
     ENABLE_INVERSION
     );
+
+  TBarcodeFormatList=TList<TBarcodeFormat>;
+  TDecodeHintValue=TObject;
+  THints=TDictionary<TDecodeHintType, TDecodeHintValue>;
 
 implementation
 

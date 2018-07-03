@@ -18,14 +18,18 @@
 }
 unit ZXing.ReadResult;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
+  SysUtils,
   Generics.Collections,
   ZXing.ResultPoint,
   ZXing.ResultMetadataType,
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.ByteSegments;
 
 type
@@ -55,7 +59,7 @@ type
   /// </summary>
   TResultMetaData = class(TDictionary<TResultMetadataType, IMetaData>)
   public
-     constructor Create;
+     constructor Create;{$ifdef FPC}override;{$endif}
      class function CreateStringMetadata(const Value:string) :IStringMetaData;
      class function CreateIntegerMetadata(const Value:integer) :IIntegerMetaData;
      class function CreateByteSegmentsMetadata(const Value:IByteSegments) :IByteSegmentsMetadata;
@@ -67,7 +71,7 @@ type
     FTimeStamp: TDateTime;
     FResultMetadata: TResultMetaData;
     FRawBytes: TArray<Byte>;
-    FResultPoints: TArray<IResultPoint>;
+    FResultPoints: TIResultPointArray;
     FFormat: TBarcodeFormat;
 
     procedure SetText(const AValue: String);
@@ -81,7 +85,7 @@ type
     /// <param name="resultPoints">The result points.</param>
     /// <param name="format">The format.</param>
     constructor Create(const text: string; const rawBytes: TArray<Byte>;
-      const resultPoints: TArray<IResultPoint>;
+      const resultPoints: TIResultPointArray;
       const format: TBarcodeFormat); overload;
 
     /// <summary>
@@ -93,7 +97,7 @@ type
     /// <param name="format">The format.</param>
     /// <param name="timestamp">The timestamp.</param>
     constructor Create(const text: string; const rawBytes: TArray<Byte>;
-      const resultPoints: TArray<IResultPoint>; const format: TBarcodeFormat;
+      const resultPoints: TIResultPointArray; const format: TBarcodeFormat;
       const timeStamp: TDateTime); overload;
     destructor Destroy; override;
 
@@ -122,7 +126,7 @@ type
     /// Adds the result points.
     /// </summary>
     /// <param name="newPoints">The new points.</param>
-    procedure addResultPoints(const newPoints: TArray<IResultPoint>);
+    procedure addResultPoints(const newPoints: TIResultPointArray);
 
     /// <returns>raw text encoded by the barcode, if applicable, otherwise <code>null</code></returns>
     property text: String read FText write SetText;
@@ -135,7 +139,7 @@ type
     /// identifying finder patterns or the corners of the barcode. The exact meaning is
     /// specific to the type of barcode that was decoded.
     /// </returns>
-    property resultPoints: TArray<IResultPoint> read FResultPoints
+    property resultPoints: TIResultPointArray read FResultPoints
       write FResultPoints;
 
     /// <returns>{@link TBarcodeFormat} representing the format of the barcode that was decoded</returns>
@@ -244,13 +248,13 @@ end;
 { TReadResult }
 
 constructor TReadResult.Create(const text: String; const rawBytes: TArray<Byte>;
-  const resultPoints: TArray<IResultPoint>; const format: TBarcodeFormat);
+  const resultPoints: TIResultPointArray; const format: TBarcodeFormat);
 begin
   Self.Create(text, rawBytes, resultPoints, format, Now);
 end;
 
 constructor TReadResult.Create(const text: String; const rawBytes: TArray<Byte>;
-  const resultPoints: TArray<IResultPoint>; const format: TBarcodeFormat;
+  const resultPoints: TIResultPointArray; const format: TBarcodeFormat;
   const timeStamp: TDateTime);
 begin
   if ((text = '') and (rawBytes = nil)) then
@@ -261,19 +265,18 @@ begin
   FResultPoints := resultPoints;
   FResultMetadata := nil;
   FFormat := format;
-  FResultMetadata := nil;
   FTimeStamp := timeStamp;
 end;
 
 destructor TReadResult.Destroy;
 begin
-  resultPoints := nil;
+  FResultPoints := nil;
   FRawBytes := nil;
 
   if FResultMetadata <> nil then
   begin
-    FResultMetadata.Clear;
-    FreeAndNil(FResultMetadata);
+    //FResultMetadata.Clear;
+    FResultMetadata.Free;
   end;
 
   inherited;
@@ -315,9 +318,9 @@ begin
   end;
 end;
 
-procedure TReadResult.addResultPoints(const newPoints: TArray<IResultPoint>);
+procedure TReadResult.addResultPoints(const newPoints: TIResultPointArray);
 var
-  oldPoints, allPoints: TArray<IResultPoint>;
+  oldPoints, allPoints: TIResultPointArray;
 begin
   oldPoints := FResultPoints;
   if (oldPoints = nil) then
@@ -326,12 +329,13 @@ begin
   begin
     if (newPoints <> nil) and (Length(newPoints) > 0) then
     begin
-      allPoints := TArray<IResultPoint>.Create();
+      allPoints := TIResultPointArray.Create{$ifndef FPC}(){$endif};
       SetLength(allPoints, (Length(oldPoints) + Length(newPoints)));
 
       Move(oldPoints[0], newPoints[0], Length(oldPoints));
       Move(newPoints[0], newPoints[Length(oldPoints)], Length(newPoints));
 
+      FResultPoints := nil;
       FResultPoints := allPoints;
     end;
   end;

@@ -1,22 +1,31 @@
 unit ZXing.ScanManager;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+  {$define USE_VCL_BITMAP}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
+  {$ifndef FPC}
 {$IFDEF USE_VCL_BITMAP}
   VCL.Graphics,
 {$ELSE}
   FMX.Graphics,
 {$ENDIF}
+  {$else}
+  Graphics,
+  {$endif}
   ZXing.LuminanceSource,
   ZXing.RGBLuminanceSource,
   ZXing.InvertedLuminanceSource,
   ZXing.HybridBinarizer,
   ZXing.BinaryBitmap,
   ZXing.MultiFormatReader,
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.ResultPoint,
   ZXing.ReadResult,
   ZXing.DecodeHintType;
@@ -25,10 +34,10 @@ type
   TScanManager = class
   private
     FEnableInversion: Boolean;
-    FHints: TDictionary<TDecodeHintType, TObject>;
+    FHints: THints;
     FResultPointEvent: TResultPointCallback;
     FMultiFormatReader: TMultiFormatReader;
-    listFormats: TList<TBarcodeFormat>;
+    listFormats: TBarcodeFormatList;
 
     function GetMultiFormatReader(const format: TBarcodeFormat)
       : TMultiFormatReader;
@@ -39,7 +48,7 @@ type
 
     function Scan(const pBitmapForScan: TBitmap): TReadResult;
     constructor Create(const format: TBarcodeFormat;
-      Hints: TDictionary<TDecodeHintType, TObject>);
+      Hints: THints);
 
     property OnResultPoint: TResultPointCallback read FResultPointEvent
       write SetResultPointEvent;
@@ -48,7 +57,7 @@ type
 implementation
 
 constructor TScanManager.Create(const format: TBarcodeFormat;
-  Hints: TDictionary<TDecodeHintType, TObject>);
+  Hints: THints);
 begin
   inherited Create;
   FEnableInversion := False;
@@ -58,7 +67,7 @@ end;
 
 destructor TScanManager.Destroy;
 var
-  hint: TPair<TDecodeHintType, TObject>;
+  hint: TPair<TDecodeHintType, TDecodeHintValue>;
   o: TObject;
 begin
   if Assigned(FHints) then
@@ -114,7 +123,7 @@ begin
   listFormats := nil;
 
   if FHints = nil then
-    FHints := TDictionary<TDecodeHintType, TObject>.Create();
+    FHints := THints.Create();
 
   if FHints.ContainsKey(ZXing.DecodeHintType.ENABLE_INVERSION) then
     FEnableInversion := true;
@@ -122,10 +131,10 @@ begin
   if format <> TBarcodeFormat.Auto then
   begin
     if (FHints.TryGetValue(ZXing.DecodeHintType.POSSIBLE_FORMATS, o)) then
-      listFormats := o as TList<TBarcodeFormat>
+      listFormats := o as TBarcodeFormatList
     else
     begin
-      listFormats := TList<TBarcodeFormat>.Create();
+      listFormats := TBarcodeFormatList.Create();
       FHints.Add(ZXing.DecodeHintType.POSSIBLE_FORMATS, listFormats);
     end;
 
@@ -144,6 +153,7 @@ var
   LuminanceSource, InvLuminanceSource: TLuminanceSource;
   HybridBinarizer: THybridBinarizer;
   BinaryBitmap: TBinaryBitmap;
+  x,y:integer;
 begin
   InvLuminanceSource := nil;
   LuminanceSource := nil;

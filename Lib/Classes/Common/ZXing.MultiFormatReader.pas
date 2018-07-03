@@ -20,18 +20,22 @@
 
 unit ZXing.MultiFormatReader;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Rtti,
-  System.Generics.Collections,
-  System.RegularExpressions,
+  SysUtils,
+  Rtti,
+  Generics.Collections,
+  {$ifndef FPC}System.RegularExpressions,{$endif}
   ZXing.ReadResult,
   ZXing.Reader,
   ZXing.DecodeHintType,
   ZXing.BinaryBitmap,
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.ResultPoint,
 
   // 1D Barcodes
@@ -62,12 +66,12 @@ type
   TMultiFormatReader = class(TInterfacedObject, IReader)
   private
 
-    FHints: TDictionary<TDecodeHintType, TObject>;
+    FHints: THints;
     readers: TList<IReader>;
 
     function DecodeInternal(image: TBinaryBitmap): TReadResult;
-    procedure Set_Hints(const Value: TDictionary<TDecodeHintType, TObject>);
-    function Get_Hints: TDictionary<TDecodeHintType, TObject>;
+    procedure Set_Hints(const Value: THints);
+    function Get_Hints: THints;
 
     /// <summary> This version of decode honors the intent of Reader.decode(BinaryBitmap) in that it
     /// passes null as a hint to the decoders. However, that makes it inefficient to call repeatedly.
@@ -94,7 +98,7 @@ type
     /// </returns>
     /// <throws>  ReaderException Any errors which occurred </throws>
     function decode(const image: TBinaryBitmap;
-      hints: TDictionary<TDecodeHintType, TObject>): TReadResult; overload;
+      hints: THints): TReadResult; overload;
 
     /// <summary> Decode an image using the state set up by calling setHints() previously. Continuous scan
     /// clients will get a <b>large</b> speed increase by using this instead of decode().
@@ -115,7 +119,7 @@ type
     /// </summary>
     /// <param name="hints">The set of hints to use for subsequent calls to decode(image)
     /// </param>
-    property hints: TDictionary<TDecodeHintType, TObject> read Get_Hints
+    property hints: THints read Get_Hints
       write Set_Hints;
 
     procedure Reset;
@@ -138,7 +142,7 @@ begin
 end;
 
 function TMultiFormatReader.decode(const image: TBinaryBitmap;
-  hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  hints: THints): TReadResult;
 begin
   FHints := hints;
   result := DecodeInternal(image)
@@ -171,16 +175,15 @@ begin
   readers := nil;
 end;
 
-function TMultiFormatReader.Get_Hints: TDictionary<TDecodeHintType, TObject>;
+function TMultiFormatReader.Get_Hints: THints;
 begin
   result := FHints;
 end;
 
-procedure TMultiFormatReader.Set_Hints(const Value: TDictionary<TDecodeHintType,
-  TObject>);
+procedure TMultiFormatReader.Set_Hints(const Value: THints);
 var
   tryHarder, useCode39CheckDigit, useCode39ExtendedMode: Boolean;
-  formats: TList<TBarcodeFormat>;
+  formats: TBarcodeFormatList;
 begin
   FHints := Value;
 
@@ -194,8 +197,8 @@ begin
   end
   else
   begin
-    formats := Value[ZXing.DecodeHintType.POSSIBLE_FORMATS]
-      as TList<TBarcodeFormat>
+    formats := (Value[ZXing.DecodeHintType.POSSIBLE_FORMATS])
+      as TBarcodeFormatList;
   end;
 
   // add readers from the hints

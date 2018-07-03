@@ -19,12 +19,16 @@
 
 unit ZXing.QrCode.Internal.Detector;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Math,
+  SysUtils,
   Generics.Collections,
+  Math,
   ZXing.Common.BitMatrix,
   ZXing.ResultPoint,
   ZXing.Common.DetectorResult,
@@ -104,7 +108,7 @@ type
     /// <returns>
     /// <see cref="TDetectorResult"/> encapsulating results of detecting a QR Code
     /// </returns>
-    function detect(const hints: TDictionary<TDecodeHintType, TObject>)
+    function detect(const hints: THints)
       : TDetectorResult; overload;
 
     property image: TBitMatrix read FImage;
@@ -229,7 +233,7 @@ begin
   Result := self.detect(nil)
 end;
 
-function TDetector.detect(const hints: TDictionary<TDecodeHintType, TObject>)
+function TDetector.detect(const hints: THints)
   : TDetectorResult;
 var
   obj: TObject;
@@ -267,7 +271,7 @@ var
   topLeft, topRight, bottomLeft: IFinderPattern;
   moduleSize, bottomRightX, bottomRightY, correctionToTopLeft: Single;
   dimension, i, modulesBetweenFPCenters, estAlignmentX, estAlignmentY: Integer;
-  points: TArray<IResultPoint>;
+  points: TIResultPointArray;
   provisionalVersion: TVersion;
   transform: TPerspectiveTransform;
   bits: TBitMatrix;
@@ -332,9 +336,9 @@ begin
     exit;
 
   if (AlignmentPattern = nil) then
-    points := TArray<IResultPoint>.Create(bottomLeft, topLeft, topRight)
+    points := TIResultPointArray.Create(bottomLeft, topLeft, topRight)
   else
-    points := TArray<IResultPoint>.Create(bottomLeft, topLeft, topRight,
+    points := TIResultPointArray.Create(bottomLeft, topLeft, topRight,
       AlignmentPattern);
 
   Result := TDetectorResult.Create(bits, points);
@@ -352,17 +356,17 @@ begin
   Result := nil;
 
   allowance := Floor(allowanceFactor * overallEstModuleSize);
-  alignmentAreaLeftX := System.Math.Max(0, (estAlignmentX - allowance));
-  alignmentAreaRightX := System.Math.Min((FImage.Width - 1),
+  alignmentAreaLeftX := Math.Max(0, (estAlignmentX - allowance));
+  alignmentAreaRightX := Math.Min((FImage.Width - 1),
     (estAlignmentX + allowance));
 
   if ((alignmentAreaRightX - alignmentAreaLeftX) < (overallEstModuleSize * 3))
   then
     exit;
 
-  alignmentAreaTopY := System.Math.Max(0, (estAlignmentY - allowance));
+  alignmentAreaTopY := Math.Max(0, (estAlignmentY - allowance));
 
-  alignmentAreaBottomY := System.Math.Min((FImage.Height - 1),
+  alignmentAreaBottomY := Math.Min((FImage.Height - 1),
     (estAlignmentY + allowance));
 
   alignmentFinder := TAlignmentPatternFinder.Create(FImage, alignmentAreaLeftX,

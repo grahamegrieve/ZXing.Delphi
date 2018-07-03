@@ -19,13 +19,16 @@
 
 unit ZXing.QrCode.Internal.FinderPattern;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
   ZXing.ResultPoint;
 
 type
-
   /// <summary>
   ///  As we did for ResultPoint, we use an interfaced object to implement automatic deallocation
   /// of TAligmnentPattern instances
@@ -61,6 +64,7 @@ type
     property count : Integer read GetCount  write SetCount;
   end;
 
+  TIFinderPatternArray=TArray<IFinderPattern>;
 
   /// <summary>
   ///  contains all static methods for using IFinderPattern instances
@@ -70,12 +74,14 @@ type
       const count: Integer):IFinderPattern; overload;
     class function CreateFinderPattern(const posX, posY, estimatedModuleSize: Single):IFinderPattern; overload;
 
-    class procedure orderBestPatterns(const patterns: TArray<IFinderPattern>); static;
+    class procedure orderBestPatterns(const patterns: TIFinderPatternArray); static;
 
   end;
 
 implementation
-uses ZXing.QrCode.Internal.FinderPatternImplementation;
+
+uses
+  ZXing.QrCode.Internal.FinderPatternImplementation;
 
 class function  TFinderPatternHelpers.CreateFinderPattern(const posX, posY, estimatedModuleSize: Single; const count: Integer):IFinderPattern;
 begin
@@ -87,9 +93,7 @@ begin
    result :=  ZXing.QrCode.Internal.FinderPatternImplementation.NewFinderPattern(posX, posY, estimatedModuleSize);
 end;
 
-
-
-class procedure TFinderPatternHelpers.orderBestPatterns( const patterns: TArray<IFinderPattern>);
+class procedure TFinderPatternHelpers.orderBestPatterns( const patterns: TIFinderPatternArray);
 var
   zeroOneDistance,
   oneTwoDistance,

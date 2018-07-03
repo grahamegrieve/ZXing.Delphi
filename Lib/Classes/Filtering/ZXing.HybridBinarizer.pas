@@ -17,6 +17,10 @@ unit ZXing.HybridBinarizer;
   * 2015-3 Adapted for Delphi/Object Pascal FireMonkey XE7 mobile by E.Spelt
 }
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses 
@@ -24,7 +28,7 @@ uses
   ZXing.GlobalHistogramBinarizer,
   ZXing.LuminanceSource,
   ZXing.Common.BitMatrix,
-  ZXing.binarizer,
+  ZXing.Binarizer,
   ZXing.Common.Detector.MathUtils;
 
 /// <summary> This class implements a local thresholding algorithm, which while slower than the
@@ -50,7 +54,8 @@ uses
 /// </author>
 
 type
-  TArrayIntOfInt = TArray<TArray<Integer>>;
+  TIntegerArray = TArray<Integer>;
+  TArrayIntOfInt = TArray<TIntegerArray>;
 
   THybridBinarizer = class(TGlobalHistogramBinarizer)
   private
@@ -99,7 +104,7 @@ var
 begin
   if (self.matrix <> nil) then
   begin
-    inherited BlackMatrix;
+    BlackMatrix;
     Exit;
   end;
 
@@ -149,13 +154,13 @@ var
     xx, pixel, average, averageNeighborBlackPoint: Integer;
 
 begin
-  blackPoints := TArrayIntOfInt.Create();
+  blackPoints := TArrayIntOfInt.Create{$ifndef FPC}(){$endif};
   SetLength(blackPoints, subHeight);
   i := 0;
 
   while ((i < subHeight)) do
   begin
-    blackPoints[i] := TArray<Integer>.Create();
+    blackPoints[i] := TArray<Integer>.Create{$ifndef FPC}(){$endif};
     SetLength(blackPoints[i], subWidth);
     inc(i)
   end;

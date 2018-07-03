@@ -19,21 +19,26 @@
 
 unit ZXing.OneD.ITFReader;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils, 
-  System.Generics.Collections, 
-  Math, 
+  SysUtils,
+  Generics.Collections,
+  Math,
   ZXing.OneD.OneDReader,
   ZXing.Common.BitArray, 
   ZXing.ReadResult,
   ZXing.DecodeHintType,
   ZXing.ResultPoint, 
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.Helpers;
 
 type
+  TIntegerArray=TArray<Integer>;
   /// <summary>
   /// <p>Implements decoding of the ITF format, or Interleaved Two of Five.</p>
   ///
@@ -55,31 +60,31 @@ type
     W: Integer = 3;
   private
 
-    class var PATTERNS: TArray<TArray<Integer>>;
-    class var END_PATTERN_REVERSED: TArray<Integer>;
+    class var PATTERNS: TArray<TIntegerArray>;
+    class var END_PATTERN_REVERSED: TIntegerArray;
     class var MAX_AVG_VARIANCE: Integer;
     class var MAX_INDIVIDUAL_VARIANCE: Integer;
-    class var DEFAULT_ALLOWED_LENGTHS: TArray<Integer>;
+    class var DEFAULT_ALLOWED_LENGTHS: TIntegerArray;
 
   class var
-    START_PATTERN: TArray<Integer>;
+    START_PATTERN: TIntegerArray;
     narrowLineWidth: Integer;
 
-    class function decodeDigit(counters: TArray<Integer>;
+    class function decodeDigit(counters: TIntegerArray;
       out bestMatch: Integer): boolean; static;
-    function decodeEnd(row: IBitArray): TArray<Integer>;
+    function decodeEnd(row: IBitArray): TIntegerArray;
     class function skipWhiteSpace(row: IBitArray): Integer; static;
     class function findGuardPattern(row: IBitArray; rowOffset: Integer;
-      pattern: TArray<Integer>): TArray<Integer>; static;
+      pattern: TIntegerArray): TIntegerArray; static;
     function validateQuietZone(row: IBitArray; startPattern: Integer): boolean;
-    function decodeStart(row: IBitArray): TArray<Integer>;
+    function decodeStart(row: IBitArray): TIntegerArray;
     class function decodeMiddle(row: IBitArray;
       payloadStart, payloadEnd: Integer; SBResult: TStringBuilder)
       : boolean; static;
     class procedure ClassInit();
   public
     function decodeRow(const rowNumber: Integer; const row: IBitArray;
-      const hints: TDictionary<TDecodeHintType, TObject>): TReadResult; override;
+      const hints: THints): TReadResult; override;
   end;
 
 implementation
@@ -112,7 +117,7 @@ begin
 end;
 
 function TITFReader.decodeRow(const rowNumber: Integer; const row: IBitArray;
-  const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  const hints: THints): TReadResult;
 var
   allowedLength: Integer;
   startRange: TArray<Integer>;
@@ -125,7 +130,7 @@ var
   SBResult: TStringBuilder;
   resultPointCallback: TResultPointCallback;
   obj: TObject;
-  resultPoints: TArray<IResultPoint>;
+  resultPoints: TIResultPointArray;
   resultPointLeft,
   resultPointRight: IResultPoint;
 begin
@@ -376,10 +381,10 @@ begin
 end;
 
 class function TITFReader.findGuardPattern(row: IBitArray; rowOffset: Integer;
-  pattern: TArray<Integer>): TArray<Integer>;
+  pattern: TIntegerArray): TIntegerArray;
 var
   patternLength: Integer;
-  counters: TArray<Integer>;
+  counters: TIntegerArray;
   width: Integer;
   isWhite: boolean;
   counterPosition: Integer;
@@ -387,7 +392,7 @@ var
   x: Integer;
 begin
   patternLength := Length(pattern);
-  counters := TArray<Integer>.Create();
+  counters := TIntegerArray.Create{$ifndef FPC}(){$endif};
   SetLength(counters, patternLength);
   width := row.Size;
   isWhite := false;

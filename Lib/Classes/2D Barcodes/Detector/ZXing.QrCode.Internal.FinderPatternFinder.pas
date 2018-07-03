@@ -19,13 +19,17 @@
 
 unit ZXing.QrCode.Internal.FinderPatternFinder;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses 
-  System.SysUtils,
-  System.Math,
-  System.Generics.Defaults,
-  System.Generics.Collections,
+uses
+  SysUtils,
+  Generics.Collections,
+  Generics.Defaults,
+  Math,
   ZXing.Common.BitMatrix,
   ZXing.ResultPoint,
   ZXing.DecodeHinttype,
@@ -58,7 +62,7 @@ type
     function crossCheckVertical(startI: Integer; centerJ: Integer; maxCount: Integer; originalStateCountTotal: Integer): Single;
     function findRowSkip: Integer;
     function haveMultiplyConfirmedCenters: boolean;
-    function selectBestPatterns: TArray<IFinderPattern>;
+    function selectBestPatterns: TIFinderPatternArray;
 
     function CrossCheckStateCount: TArray<Integer>;
   protected
@@ -92,7 +96,7 @@ type
 
     destructor Destroy; override;
 
-    function find(const hints: TDictionary<TDecodeHintType, TObject>): TFinderPatternInfo; virtual;
+    function find(const hints: THints): TFinderPatternInfo; virtual;
   end;
 
   TFurthestFromAverageComparator = class sealed(TInterfacedObject,
@@ -101,7 +105,7 @@ type
     average: Single;
   public
     constructor Create(f: Single);
-    function Compare(const Left, Right: IFinderPattern): Integer;
+    function Compare({$ifdef FPC}constref{$else}const{$endif} Left, Right: IFinderPattern): Integer;
   end;
 
   TCenterComparator = class sealed(TInterfacedObject, IComparer<IFinderPattern>)
@@ -109,7 +113,7 @@ type
     average: Single;
   public
     constructor Create(f: Single);
-    function Compare(const Left, Right: IFinderPattern): Integer;
+    function Compare({$ifdef FPC}constref{$else}const{$endif} Left, Right: IFinderPattern): Integer;
   end;
 
 implementation
@@ -499,15 +503,15 @@ begin
 end;
 
 function TFinderPatternFinder.find(
-  const hints: TDictionary<TDecodeHintType, TObject>): TFinderPatternInfo;
+  const hints: THints): TFinderPatternInfo;
 var
   tryHarder, pureBarcode,
   done, confirmed: Boolean;
   maxI, maxJ, iSkip,
   i, currentState, j, rowSkip: Integer;
   stateCount: TArray<Integer>;
-  patternInfo: TArray<IFinderPattern>;
-  resultInfo: TArray<IResultPoint>;
+  patternInfo: TIFinderPatternArray;
+  resultInfo: TIResultPointArray;
 begin
   Result := nil;
 
@@ -830,7 +834,7 @@ begin
 
 end;
 
-function TFinderPatternFinder.selectBestPatterns: TArray<IFinderPattern>;
+function TFinderPatternFinder.selectBestPatterns: TIFinderPatternArray;
 var
   totalModuleSize, average, size, stdDev, square, limit: Single;
   center, possibleCenter, pattern: IFinderPattern;
@@ -865,7 +869,7 @@ begin
     // assignment)
     comparator :=  TFurthestFromAverageComparator.Create(average);
     FPossibleCenters.Sort(comparator);
-    limit := System.Math.Max((0.2 * average), stdDev);
+    limit := Math.Max((0.2 * average), stdDev);
     i := 0;
     while (((i < FPossibleCenters.Count) and
       (FPossibleCenters.Count > 3))) do
@@ -906,14 +910,14 @@ begin
 
   end;
 
-  result := TArray<IFinderPattern>.Create(FPossibleCenters[0],
+  result := TIFinderPatternArray.Create(FPossibleCenters[0],
     FPossibleCenters[1], FPossibleCenters[2]);
 
 end;
 
 { TFurthestFromAverageComparator }
 
-function TFurthestFromAverageComparator.Compare(const Left,
+function TFurthestFromAverageComparator.Compare({$ifdef FPC}constref{$else}const{$endif} Left,
   Right: IFinderPattern): Integer;
 var
   dA, dB: Single;
@@ -941,7 +945,7 @@ end;
 
 { TCenterComparator }
 
-function TCenterComparator.Compare(const Left, Right: IFinderPattern): Integer;
+function TCenterComparator.Compare({$ifdef FPC}constref{$else}const{$endif} Left, Right: IFinderPattern): Integer;
 var
   dA, dB: Single;
 begin

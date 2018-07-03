@@ -20,10 +20,14 @@
 
 unit ZXing.Common.DetectorResult;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
+  SysUtils,
   ZXing.Common.BitMatrix,
   ZXing.ResultPoint;
 
@@ -35,19 +39,19 @@ type
   TDetectorResult = class
   private
     Fbits: TBitmatrix;
-    Fpoints: TArray<IResultPoint>;
+    Fpoints: TIResultPointArray;
   public
-    constructor Create(const bits: TBitmatrix; const points: TArray<IResultPoint>);
+    constructor Create(const bits: TBitmatrix; const points: TIResultPointArray);
     destructor Destroy; override;
 
     property bits: TBitmatrix read Fbits;
-    property points: TArray<IResultPoint> read Fpoints;
+    property points: TIResultPointArray read Fpoints;
   end;
 
 implementation
 
 constructor TDetectorResult.Create(const bits: TBitmatrix;
-  const points: TArray<IResultPoint>);
+  const points: TIResultPointArray);
 begin
   Fbits := bits;
   Fpoints := points;

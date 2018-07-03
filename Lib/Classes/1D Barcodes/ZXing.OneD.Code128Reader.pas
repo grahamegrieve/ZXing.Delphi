@@ -19,22 +19,29 @@
 
 unit ZXing.OneD.Code128Reader;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
-  System.Math,
+  SysUtils,
+  Generics.Collections,
+  Math,
   ZXing.Helpers,
   ZXing.OneD.OneDReader,
   ZXing.Common.BitArray,
   ZXing.ReadResult,
   ZXing.DecodeHintType,
   ZXing.ResultPoint,
-  ZXing.BarcodeFormat;
+  ZXing.BarCodeFormat;
+
+type
+  TIntegerArray=TArray<Integer>;
 
 var
-  CODE_PATTERNS: TArray<TArray<Integer>>;
+  CODE_PATTERNS: TArray<TIntegerArray>;
 
 type
   /// <summary>
@@ -66,7 +73,7 @@ type
     class procedure DoFinalize();
   public
     function decodeRow(const rowNumber: Integer; const row: IBitArray;
-      const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+      const hints: THints): TReadResult;
       override;
   end;
 
@@ -140,7 +147,7 @@ begin
   width := row.Size;
   rowOffset := row.getNextSet(0);
   counterPosition := 0;
-  counters := TArray<Integer>.Create();
+  counters := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(counters, 6);
   patternStart := rowOffset;
   isWhite := false;
@@ -248,7 +255,7 @@ begin
 end;
 
 function TCode128Reader.decodeRow(const rowNumber: Integer;
-  const row: IBitArray; const hints: TDictionary<TDecodeHintType, TObject>)
+  const row: IBitArray; const hints: THints)
   : TReadResult;
 var
   shiftUpperMode, upperMode, lastCharacterWasPrintable, convertFNC1, done,
@@ -263,7 +270,7 @@ var
   left, right: Single;
   resultPointCallback: TResultPointCallback;
   obj: TObject;
-  resultPoints: TArray<IResultPoint>;
+  resultPoints: TIResultPointArray;
   resultPointLeft, resultPointRight: IResultPoint;
 begin
   convertFNC1 := (hints <> nil) and
@@ -279,6 +286,8 @@ begin
   startCode := startPatternInfo[2];
 
   rawCodes := TList<Byte>.Create();
+
+  aResult:='';
 
   try
 
@@ -605,7 +614,7 @@ begin
     // we fudged decoding CODE_STOP since it actually has 7 bars, not 6. There is a black bar left
     // to read off. Would be slightly better to properly read. Here we just skip it:
     nextStart := row.getNextUnset(nextStart);
-    if not row.isRange(nextStart, System.Math.Min(row.Size,
+    if not row.isRange(nextStart, Math.Min(row.Size,
       nextStart + (nextStart - lastStart) div 2), false) then
     begin
       result := nil;

@@ -20,15 +20,22 @@
 
 unit ZXing.QrCode.Internal.FormatInformation;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
+  Classes,
   Generics.Collections,
   ZXing.QrCode.Internal.ErrorCorrectionLevel,
-  Classes,
   ZXing.Common.Detector.MathUtils;
 
 type
+  {$ifndef FPC}
+  PtrInt = integer;
+  {$endif}
   /// <summary> <p>Encapsulates a QR Code's format information, including the data mask used and
   /// error correction level.</p>
   ///
@@ -60,7 +67,7 @@ type
     constructor Create(const formatInfo: Integer);
 
     function Equals(o: TObject): Boolean; override;
-    function GetHashCode: Integer; override;
+    function GetHashCode: PtrInt; override;
     class function numBitsDiffering(a, b: Integer): Integer; static;
 
     /// <summary>
@@ -174,7 +181,7 @@ begin
     (FDataMask = other.DataMask));
 end;
 
-function TFormatInformation.GetHashCode: Integer;
+function TFormatInformation.GetHashCode: PtrInt;
 begin
   Result := ((FErrorCorrectionLevel.ordinal shl 3) or FDataMask)
 end;

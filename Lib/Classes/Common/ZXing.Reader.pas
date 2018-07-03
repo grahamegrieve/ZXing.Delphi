@@ -19,11 +19,15 @@
 
 unit ZXing.Reader;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
   ZXing.BinaryBitmap,
   ZXing.ReadResult,
   ZXing.DecodeHintType;
@@ -57,7 +61,7 @@ type
     /// </param>
     /// <returns>String which the barcode encodes</returns>
     function decode(const image: TBinaryBitmap;
-      hints: TDictionary<TDecodeHintType, TObject>): TReadResult; overload;
+      hints: THints): TReadResult; overload;
 
     /// <summary>
     /// Resets any internal state the implementation has after a decode, to prepare it

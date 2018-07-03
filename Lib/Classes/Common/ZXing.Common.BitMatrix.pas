@@ -19,22 +19,34 @@
 
 unit ZXing.Common.BitMatrix;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+  {$define USE_VCL_BITMAP}
+{$ENDIF}
+
 interface
 
 uses
   SysUtils,
+  {$ifndef FPC}
 {$IFDEF USE_VCL_BITMAP}
   VCL.Graphics,
 {$ELSE}
   FMX.Graphics,
 {$ENDIF}
+  {$else}
+  Graphics,
+  {$endif}
   Generics.Collections,
   ZXing.Common.BitArray,
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.Helpers,
   ZXing.Common.Detector.MathUtils;
 
 type
+  {$ifndef FPC}
+  PtrInt = integer;
+  {$endif}
   /// <summary>
   /// <p>Represents a 2D matrix of bits. In function arguments below, and throughout the common
   /// module, x is the column position, and y is the row position. The ordering is always x, y.
@@ -68,7 +80,7 @@ type
     procedure flip(x: Integer; y: Integer);
     function getBottomRightOnBit: TArray<Integer>;
     function getEnclosingRectangle: TArray<Integer>;
-    function GetHashCode: Integer; override;
+    function GetHashCode: PtrInt; override;
     function getRow(const y: Integer; row: IBitArray): IBitArray;
     function getTopLeftOnBit: TArray<Integer>;
     procedure Rotate180;
@@ -95,7 +107,10 @@ var
   offset, v, bits, shift: Integer;
   uBits: LongWord;
 begin
+  Result:=false;
+  if ((x<0) or (y<0)) then exit;
   offset := y * FrowSize + TMathUtils.Asr(x, 5);
+  if (offset>=length(Fbits)) then exit;
   try
     bits := Fbits[offset];
     uBits := LongWord(bits);
@@ -321,7 +336,7 @@ begin
   Result := TArray<Integer>.Create(left, top, widthTmp, heightTmp);
 end;
 
-function TBitMatrix.GetHashCode: Integer;
+function TBitMatrix.GetHashCode: PtrInt;
 var
   bit, hash: Integer;
 begin

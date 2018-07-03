@@ -21,13 +21,18 @@ unit ZXing.Common.ReedSolomon.GenericGF;
 
 // ES: two classes in one unit. This is to avoid circulair reference.
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses SysUtils;
+uses
+  SysUtils;
 
 type
   TGenericGFPoly = class;
-
+  TGenericGFPolyArray=TArray<TGenericGFPoly>;
   /// <summary>
   ///   <p>This class contains utility methods for performing mathematical operations over
   /// the Galois Fields. Operations use a given primitive polynomial in calculations.</p>
@@ -105,7 +110,7 @@ type
     constructor Create(Field: TGenericGF; coefficients: TArray<Integer>);
     destructor Destroy(); override;
     function addOrSubtract(other: TGenericGFPoly): TGenericGFPoly;
-    function divide(other: TGenericGFPoly): TArray<TGenericGFPoly>;
+    function divide(other: TGenericGFPoly): TGenericGFPolyArray;
     function evaluateAt(a: Integer): Integer;
     function getCoefficient(degree: Integer): Integer;
 
@@ -155,8 +160,8 @@ begin
   Fsize := size;
 
   FGeneratorBase := genBase;
-  self.FexpTable := TArray<Integer>.Create();
-  self.FlogTable := TArray<Integer>.Create();
+  self.FexpTable := TArray<Integer>.Create{$ifndef FPC}(){$endif};
+  self.FlogTable := TArray<Integer>.Create{$ifndef FPC}(){$endif};
 
   SetLength(self.FexpTable, size);
   SetLength(self.FlogTable, size);
@@ -214,7 +219,7 @@ begin
     exit
   end;
 
-  coefficients := TArray<Integer>.Create();
+  coefficients := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(coefficients, degree + 1);
   coefficients[0] := coefficient;
 
@@ -335,7 +340,7 @@ begin
       inc(firstNonZero)
     end;
 
-    Fcoefficients := TArray<Integer>.Create();
+    Fcoefficients := TArray<Integer>.Create{$ifndef FPC}(){$endif};
     if (firstNonZero = coefficientsLength) then
     begin
       SetLength(Fcoefficients, 1);
@@ -391,7 +396,7 @@ begin
     largerCoefficients := temp
   end;
 
-  sumDiff := TArray<Integer>.Create();
+  sumDiff := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(sumDiff, Length(largerCoefficients));
   lengthDiff := Length(largerCoefficients) - Length(smallerCoefficients);
 
@@ -411,7 +416,7 @@ begin
   Result := TGenericGFPoly.Create(self.Ffield, sumDiff);
 end;
 
-function TGenericGFPoly.divide(other: TGenericGFPoly): TArray<TGenericGFPoly>;
+function TGenericGFPoly.divide(other: TGenericGFPoly): TGenericGFPolyArray;
 var
   term, quotient, remainder, iterationQuotient: TGenericGFPoly;
   degreeDifference, denominatorLeadingTerm, scale,
@@ -437,10 +442,10 @@ begin
     term := other.multiplyByMonomial(degreeDifference, scale);
     iterationQuotient := self.Ffield.buildMonomial(degreeDifference, scale);
     quotient := quotient.addOrSubtract(iterationQuotient);
-    remainder := remainder.addOrSubtract(term)
+    remainder := remainder.addOrSubtract(term);
   end;
 
-  Result := TArray<TGenericGFPoly>.Create(quotient, remainder);
+  Result := TGenericGFPolyArray.Create(quotient, remainder);
 end;
 
 function TGenericGFPoly.evaluateAt(a: Integer): Integer;
@@ -515,7 +520,7 @@ begin
   aLength := Length(aCoefficients);
   bCoefficients := other.coefficients;
   bLength := Length(bCoefficients);
-  product := TArray<Integer>.Create();
+  product := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(product, (aLength + bLength) - 1);
   i := 0;
 
@@ -555,7 +560,7 @@ begin
   end;
 
   size := Length(self.coefficients);
-  product := TArray<Integer>.Create();
+  product := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(product, size);
   i := 0;
   while ((i < size)) do
@@ -584,7 +589,7 @@ begin
   end;
 
   size := Length(self.coefficients);
-  product := TArray<Integer>.Create();
+  product := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(product, size + degree);
   i := 0;
 
@@ -652,6 +657,8 @@ end;
 
 initialization
   TGenericGF.InitializeClass();
+
 finalization
   TGenericGF.FinalizeClass();
+
 end.

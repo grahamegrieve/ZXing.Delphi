@@ -18,12 +18,16 @@
 
 unit ZXing.OneD.UPCEANExtensionSupport;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses 
-  System.SysUtils, 
-  System.Generics.Collections,
-  System.Math,
+uses
+  SysUtils,
+  Generics.Collections,
+  Math,
   ZXing.OneD.UPCEANExtension2Support,
   ZXing.OneD.UPCEANExtension5Support,
   ZXing.Reader,

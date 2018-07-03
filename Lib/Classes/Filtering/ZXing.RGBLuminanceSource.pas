@@ -19,22 +19,43 @@
 
 unit ZXing.RGBLuminanceSource;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+  //{$mode advancedrecords}
+  {$define USE_VCL_BITMAP}
+{$ENDIF}
+
 interface
+
 uses
-  System.SysUtils,
-  System.UITypes,
-  System.TypInfo,
-{$IFDEF USE_VCL_BITMAP}
+  SysUtils,
+  TypInfo,
+  {$ifndef FPC}
+  UITypes,
+  {$IFDEF USE_VCL_BITMAP}
   Winapi.Windows,
   VCL.Graphics,
-{$ELSE}
+  {$ELSE}
   FMX.Graphics,
-{$ENDIF}
+  {$ENDIF}
+  {$else}
+  BMPcomn,
+  //Classes,
+  fpimage,
+  //fpreadbmp,
+  //fpwritebmp,
+  //LCLIntf,
+  //LCLType,
+  GraphType,
+  Graphics,
+  IntfGraphics,
+  {$endif}
   ZXing.LuminanceSource,
   ZXing.BaseLuminanceSource,
   ZXing.Common.Detector.MathUtils;
 
 type
+
   /// <summary>
   /// enumeration of supported bitmap format which the RGBLuminanceSource can process
   /// </summary>
@@ -118,6 +139,7 @@ type
   end;
 
 implementation
+
 uses ZXing.Helpers;
 
 /// <summary>
@@ -163,17 +185,82 @@ end;
 // VCL TBitmap implementation
 constructor TRGBLuminanceSource.CreateFromBitmap(const sourceBitmap: TBitmap; const width, height: Integer);
 type
+  {$ifdef FPC}
+  TRGBAarray = array[0 .. ((MaxInt div SizeOf(TColorRGBA)) - 1)] of TColorRGBA;
+  pRGBAarray = ^TRGBAarray;
+  {$else}
   TRGBTripleArray = ARRAY[Word] of TRGBTriple;
   pRGBTripleArray = ^TRGBTripleArray; // Use a PByteArray for pf8bit color.
-
+  {$endif}
 var
   x, y,
   offset : Integer;
-  r, g, b : Byte;
+  r, g, b : integer;
+  {$ifdef FPC}
+  dx, dy : Integer;
+  PixelColor:TFPColor;
+  scanLine: PColorRGBA;
+  Raw: TRawImage;
+  lazBmp : TLazIntfImage;
+  {$else}
   P: pRGBTripleArray;
-
+  {$endif}
 begin
   Self.Create(width, height);
+
+  {$ifdef FPC}
+  Raw := sourceBitmap.RawImage;
+  with Raw.Description do
+  begin
+    dx := (BitsPerPixel DIV 8);
+  end;
+
+  if (Raw.Description.ByteOrder = riboLSBFirst) and (Raw.Description.BlueShift =0 ) then
+  begin
+    // format will be BGR
+  end
+  else
+  begin
+    // format will be RGB
+  end;
+  //if sourceBitmap.PixelFormat=pf32bit then
+  lazBmp:=nil;
+  if Raw.Description.BitsPerPixel<8 then
+  begin
+    lazBmp := sourceBitmap.CreateIntfImage;
+  end;
+
+  sourceBitmap.BeginUpdate;
+  for y := 0 to sourceBitmap.Height - 1 do
+  begin
+    offset := y * FWidth;
+    //offset := y * sourceBitmap.Width;
+    scanLine := PColorRGBA(sourceBitmap.ScanLine[y]);
+    for x := 0 to sourceBitmap.Width - 1 do
+    begin
+      // Slow !!!
+      //PixelColor:=aBitmap.Canvas.Pixels[x,y];
+      if Assigned(lazBmp) then
+      begin
+        PixelColor:=lazBmp.Colors[x,y];
+        r:=PixelColor.red;
+        g:=PixelColor.green;
+        b:=PixelColor.blue;
+      end
+      else
+      begin
+        r:=scanLine^.R;
+        g:=scanLine^.G;
+        b:=scanLine^.B;
+        Inc(PByte(scanLine),dx);
+      end;
+      //luminances[offset + x] := (TMathUtils.Asr(3482*r + 11721*g + 1181*b, 14) AND $FF);
+      luminances[offset + x] := (TMathUtils.Asr(RChannelWeight*r + GChannelWeight*g + BChannelWeight*b,ChannelWeight) AND $FF);
+    end;
+  end;
+  sourceBitmap.EndUpdate;
+  if Assigned(lazBmp) then lazBmp.Free;
+  {$else}
   sourceBitmap.PixelFormat := pf24bit;
   for y := 0 to sourceBitmap.Height - 1 do
   begin
@@ -181,12 +268,13 @@ begin
     P := sourceBitmap.ScanLine[y];
     for x := 0 to sourceBitmap.Width - 1 do
     begin
-       r := P[x].rgbtRed;
-       g := P[x].rgbtGreen;
-       b := P[x].rgbtBlue;
-       luminances[offset + x] := TMathUtils.Asr(3482*r + 11721*g + 1181*b, 14);
+      r := P[x].rgbtRed;
+      g := P[x].rgbtGreen;
+      b := P[x].rgbtBlue;
+      luminances[offset + x] := TMathUtils.Asr(3482*r + 11721*g + 1181*b, 14);
     end;
   end;
+  {$endif}
 end;
 {$ELSE}
 // FMX TBitmap implementation
@@ -220,7 +308,7 @@ begin
         end;
       end;
     finally
-      sourceBitmap.Unmap(currentData);
+      //sourceBitmap.Unmap(currentData);
       //sourceBitmap.DisposeOf();
     end;
   end;
@@ -266,7 +354,7 @@ end;
 procedure TRGBLuminanceSource.CalculateLuminance(const rgbRawBytes: TArray<Byte>;
   bitmapFormat: TBitmapFormat);
 var
-  len: Integer;
+  i,len: Integer;
 begin
   if (bitmapFormat = TBitmapFormat.Unknown)
   then
@@ -281,7 +369,11 @@ begin
         else
            len := Length(luminances);
 
+        {$ifdef FPC}
+        for i:=0 to len-1 do rgbRawBytes[i]:=0;
+        {$else}
         Copy(rgbRawBytes, 0, len);
+        {$endif}
       end;
     TBitmapFormat.RGB24 :
       begin

@@ -19,18 +19,22 @@
 
 unit ZXing.OneD.Code93Reader;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
   Math,
   ZXing.OneD.OneDReader,
   ZXing.Common.BitArray,
   ZXing.ReadResult,
   ZXing.DecodeHintType,
   ZXing.ResultPoint,
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.Common.Detector.MathUtils;
 
 type
@@ -47,7 +51,7 @@ type
     class function decodeExtended(encoded: TStringBuilder): string; static;
 
     function findAsteriskPattern(row: IBitArray): TArray<Integer>;
-    class function patternToChar(pattern: Integer; var c: Char)
+    class function patternToChar(pattern: Integer; out c: Char)
       : boolean; static;
     class function toPattern(counters: TArray<Integer>): Integer; static;
 
@@ -66,7 +70,7 @@ type
     destructor Destroy; override;
 
     function decodeRow(const rowNumber: Integer; const row: IBitArray;
-      const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+      const hints: THints): TReadResult;
       override;
   end;
 
@@ -85,7 +89,7 @@ begin
 
   ASTERISK_ENCODING := TCode93Reader.CHARACTER_ENCODINGS[$2F];
 
-  counters := TArray<Integer>.Create();
+  counters := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(counters, 6);
   decodeRowResult := TStringBuilder.Create();
 end;
@@ -262,7 +266,7 @@ begin
 end;
 
 function TCode93Reader.decodeRow(const rowNumber: Integer; const row: IBitArray;
-  const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  const hints: THints): TReadResult;
 var
   decodedChar: Char;
   lastStart: Integer;
@@ -272,7 +276,7 @@ var
   Left, Right: Single;
   resultPointCallback: TResultPointCallback;
   obj: TObject;
-  resultPoints: TArray<IResultPoint>;
+  resultPoints: TIResultPointArray;
   resultPointLeft, resultPointRight: IResultPoint;
 begin
   for index := 0 to length(counters) - 1 do
@@ -306,7 +310,10 @@ begin
       exit
     end;
 
-    self.decodeRowResult.Append(decodedChar);
+    {$ifdef FPC}
+    if decodedChar <> '*' then
+    {$endif}
+      self.decodeRowResult.Append(decodedChar);
     lastStart := nextStart;
 
     for counter in self.counters do
@@ -317,7 +324,9 @@ begin
 
   until (decodedChar = '*');
 
+  {$ifndef FPC}
   self.decodeRowResult.Remove((self.decodeRowResult.length - 1), 1);
+  {$endif}
 
   lastPatternSize := 0;
 
@@ -448,7 +457,7 @@ begin
 end;
 
 class function TCode93Reader.patternToChar(pattern: Integer;
-  var c: Char): boolean;
+  out c: Char): boolean;
 var
   i: Integer;
 begin

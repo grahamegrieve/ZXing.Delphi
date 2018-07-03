@@ -18,11 +18,15 @@ unit ZXing.OneD.UPCAReader;
   * Delphi Implementation by E. Spelt
 }
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
   Math,
   ZXing.OneD.OneDReader,
   ZXing.Common.BitArray,
@@ -30,7 +34,7 @@ uses
   ZXing.ReadResult,
   ZXing.DecodeHintType,
   ZXing.ResultPoint,
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.Helpers,
   ZXing.OneD.EAN13Reader,
   ZXing.OneD.UPCEANReader;
@@ -51,15 +55,15 @@ type
       : Integer; override;
 
     function decode(const image: TBinaryBitmap;
-      hints: TDictionary<TDecodeHintType, TObject>): TReadResult; override;
+      hints: THints): TReadResult; override;
 
     function decodeRow(const rowNumber: Integer; const row: IBitArray;
-      const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+      const hints: THints): TReadResult;
       overload; override;
 
     function decodeRow(const rowNumber: Integer; const row: IBitArray;
       const startGuardRange: TArray<Integer>;
-      const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+      const hints: THints): TReadResult;
       reintroduce; overload;
 
     function BarcodeFormat: TBarcodeFormat; override;
@@ -80,7 +84,7 @@ begin
 end;
 
 function TUPCAReader.decode(const image: TBinaryBitmap;
-  hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  hints: THints): TReadResult;
 begin
   result := TUPCAReader.maybeReturnResult(self.EAN13Reader.decode(image, hints))
 end;
@@ -93,7 +97,7 @@ begin
 end;
 
 function TUPCAReader.decodeRow(const rowNumber: Integer; const row: IBitArray;
-  const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  const hints: THints): TReadResult;
 begin
   result := TUPCAReader.maybeReturnResult(self.EAN13Reader.decodeRow(rowNumber,
     row, hints))
@@ -101,7 +105,7 @@ end;
 
 function TUPCAReader.decodeRow(const rowNumber: Integer; const row: IBitArray;
   const startGuardRange: TArray<Integer>;
-  const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  const hints: THints): TReadResult;
 begin
   result := TUPCAReader.maybeReturnResult
     (self.EAN13Reader.doDecodeRow(rowNumber, row, startGuardRange, hints))
@@ -117,6 +121,13 @@ begin
   if not Assigned(pResult) then
     Exit(nil);
 
+  {$ifdef FPC}
+  if pResult.Text[1]='0' then
+  begin
+    pResult.text := copy(pResult.text, 2, length(pResult.text));
+    pResult.BarcodeFormat := TBarcodeFormat.UPC_A;
+  end;
+  {$else}
 {$ZEROBASEDSTRINGS ON}
   if (copy(pResult.text, 0, 1) = '0') then
   begin
@@ -124,6 +135,8 @@ begin
     pResult.BarcodeFormat := TBarcodeFormat.UPC_A;
   end;
 {$ZEROBASEDSTRINGS OFF}
+  {$endif}
+
   result := pResult;
 
 end;

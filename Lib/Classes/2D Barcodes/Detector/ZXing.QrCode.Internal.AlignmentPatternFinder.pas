@@ -20,12 +20,16 @@
 
 unit ZXing.QrCode.Internal.AlignmentPatternFinder;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses 
-  System.SysUtils,
-  System.Math,
-  System.Generics.Collections,
+uses
+  SysUtils,
+  Generics.Collections,
+  Math,
   ZXing.Common.BitMatrix,
   ZXing.QrCode.Internal.AlignmentPattern, // nullableType,
   ZXing.ResultPoint,

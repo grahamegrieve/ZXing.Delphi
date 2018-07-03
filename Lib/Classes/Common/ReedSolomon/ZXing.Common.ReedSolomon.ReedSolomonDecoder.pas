@@ -19,10 +19,14 @@
 
 unit ZXing.Common.ReedSolomon.ReedSolomonDecoder;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses 
-  System.SysUtils, 
+uses
+  SysUtils,
   // Hint: ZXing.Common.ReedSolomon.GenericGFPoly is implemented in GenericGF as second class
   ZXing.Common.ReedSolomon.GenericGF;
 
@@ -42,7 +46,7 @@ type
       errorLocations: TArray<Integer>): TArray<Integer>;
   private
     function runEuclideanAlgorithm(a: TGenericGFPoly; b: TGenericGFPoly;
-      pR: Integer): TArray<TGenericGFPoly>;
+      pR: Integer): TGenericGFPolyArray;
 
   strict private
     field: TGenericGF;
@@ -62,15 +66,16 @@ function TReedSolomonDecoder.decode(received: TArray<Integer>;
 var
   i, eval, position: Integer;
   poly, syndrome, sigma, omega: TGenericGFPoly;
-  sigmaOmega: TArray<TGenericGFPoly>;
+  sigmaOmega: TGenericGFPolyArray;
   errorLocations: TArray<Integer>;
 
   syndromeCoefficients, errorMagnitudes: TArray<Integer>;
   noError: boolean;
 begin
+  syndrome := nil;
   poly := TGenericGFPoly.Create(self.field, received);
 
-  syndromeCoefficients := TArray<Integer>.Create();
+  syndromeCoefficients := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(syndromeCoefficients, twoS);
 
   try
@@ -88,6 +93,7 @@ begin
 
     if (noError) then
     begin
+      syndromeCoefficients := nil;
       Result := true;
       Exit;
     end;
@@ -127,8 +133,11 @@ begin
     end;
 
   finally
-    FreeAndNil(poly);
-    syndromeCoefficients := nil;
+    //FreeAndNil(poly);
+    //FreeAndNil(syndrome);
+    if Assigned(errorLocations) then errorLocations:=nil;
+    if Assigned(errorLocations) then errorLocations:=nil;
+    if Assigned(errorMagnitudes) then errorMagnitudes := nil;
   end;
 
   Result := true;
@@ -149,7 +158,7 @@ begin
     Exit
   end;
 
-  Result := TArray<Integer>.Create();
+  Result := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(Result, numErrors);
 
   e := 0;
@@ -182,7 +191,7 @@ var
 
 begin
   s := Length(errorLocations);
-  Result := TArray<Integer>.Create();
+  Result := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(Result, s);
 
   i := 0;
@@ -224,7 +233,7 @@ begin
 end;
 
 function TReedSolomonDecoder.runEuclideanAlgorithm(a, b: TGenericGFPoly;
-  pR: Integer): TArray<TGenericGFPoly>;
+  pR: Integer): TGenericGFPolyArray;
 var
   temp, rLastLast, tLastLast, rLast, tLast, t, q, sigma, omega,
     R: TGenericGFPoly;
@@ -291,7 +300,7 @@ begin
   sigma := t.multiply(inverse);
   omega := R.multiply(inverse);
 
-  Result := TArray<TGenericGFPoly>.Create(sigma, omega);
+  Result := TGenericGFPolyArray.Create(sigma, omega);
 
 end;
 

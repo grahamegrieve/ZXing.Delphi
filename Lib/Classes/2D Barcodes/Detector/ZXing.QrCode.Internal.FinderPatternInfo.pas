@@ -19,6 +19,10 @@
 
 unit ZXing.QrCode.Internal.FinderPatternInfo;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses 
@@ -39,7 +43,7 @@ type
     /// Initializes a new instance of the <see cref="FinderPatternInfo"/> class.
     /// </summary>
     /// <param name="patternCenters">The pattern centers.</param>
-    constructor Create(const patternCenters: TArray<IFinderPattern>);
+    constructor Create(const patternCenters: TIFinderPatternArray);
 
     /// <summary>
     /// Gets the bottom left.
@@ -59,7 +63,7 @@ type
 
 implementation
 
-constructor TFinderPatternInfo.Create(const patternCenters: TArray<IFinderPattern>);
+constructor TFinderPatternInfo.Create(const patternCenters: TIFinderPatternArray);
 begin
   FbottomLeft := patternCenters[0];
   FtopLeft := patternCenters[1];

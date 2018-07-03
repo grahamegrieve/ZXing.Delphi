@@ -1,0 +1,112 @@
+object MainForm: TMainForm
+  Left = 360
+  Height = 494
+  Top = 145
+  Width = 559
+  HorzScrollBar.Page = 470
+  VertScrollBar.Page = 347
+  Caption = 'ZXing based barcode scanner'
+  ClientHeight = 494
+  ClientWidth = 559
+  OnCreate = VideoCreate
+  OnDestroy = VideoDestroy
+  LCLVersion = '1.9.0.0'
+  object pCapture: TPanel
+    Left = 0
+    Height = 373
+    Top = 104
+    Width = 559
+    Align = alClient
+    BevelOuter = bvLowered
+    FullRepaint = False
+    TabOrder = 0
+    OnResize = pCaptureResize
+  end
+  object stCapture: TStaticText
+    Left = 0
+    Height = 17
+    Top = 477
+    Width = 559
+    Align = alBottom
+    Alignment = taCenter
+    TabOrder = 2
+  end
+  object pControl: TPanel
+    Left = 0
+    Height = 104
+    Top = 0
+    Width = 559
+    Align = alTop
+    BevelInner = bvLowered
+    ClientHeight = 104
+    ClientWidth = 559
+    FullRepaint = False
+    TabOrder = 1
+    object bSource: TButton
+      Left = 8
+      Height = 41
+      Hint = 'Change video source and adjust settings'
+      Top = 8
+      Width = 53
+      Caption = '&Source'
+      OnClick = bSourceClick
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+    end
+    object bFormat: TButton
+      Left = 72
+      Height = 41
+      Hint = 'Slelect the image format for frames'
+      Top = 8
+      Width = 53
+      Caption = '&Format'
+      OnClick = bFormatClick
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+    end
+    object bReconnect: TButton
+      Left = 8
+      Height = 41
+      Hint = 'Update the driver information after changing the source'
+      Top = 55
+      Width = 53
+      Caption = '&Connect'
+      OnClick = bConnectClick
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 2
+    end
+    object bQuality: TButton
+      Left = 72
+      Height = 41
+      Hint = 'Configure compression for recording'
+      Top = 55
+      Width = 53
+      Caption = '&Quality'
+      OnClick = bQualityClick
+      TabOrder = 3
+    end
+    object Scan: TButton
+      Left = 136
+      Height = 88
+      Top = 8
+      Width = 96
+      Caption = 'Start scanner'
+      OnClick = ScanClick
+      TabOrder = 4
+    end
+    object Memo1: TMemo
+      Left = 240
+      Height = 88
+      Top = 8
+      Width = 306
+      Lines.Strings = (
+        'Memo1'
+      )
+      ScrollBars = ssBoth
+      TabOrder = 5
+    end
+  end
+end

@@ -19,10 +19,14 @@
 
 unit ZXing.QrCode.Internal.Mode;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
+  SysUtils,
   ZXing.QrCode.Internal.Version;
 
 type

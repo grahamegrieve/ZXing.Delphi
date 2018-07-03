@@ -21,19 +21,23 @@
 
 unit ZXing.OneD.EAN8Reader;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
-  System.Math,
+  SysUtils,
+  Generics.Collections,
+  Math,
   ZXing.OneD.OneDReader,
   ZXing.Common.BitArray,
   ZXing.OneD.UPCEANReader,
   ZXing.ReadResult,
   ZXing.DecodeHintType,
   ZXing.ResultPoint,
-  ZXing.BarcodeFormat;
+  ZXing.BarCodeFormat;
 
 type
   /// <summary>

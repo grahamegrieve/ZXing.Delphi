@@ -19,13 +19,17 @@
 
 unit ZXing.Datamatrix.Internal.Detector;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Math,
-  System.Generics.Defaults,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
+  Generics.Defaults,
+  Math,
   ZXing.Common.BitMatrix,
   ZXing.DefaultGridSampler,
   ZXing.Common.DetectorResult,
@@ -67,7 +71,7 @@ type
     TResultPointsAndTransitionsComparator = class sealed
       (TComparer<TResultPointsAndTransitions>)
     public
-      function Compare(const o1, o2: TResultPointsAndTransitions)
+      function Compare({$ifdef FPC}constref{$else}const{$endif} o1, o2: TResultPointsAndTransitions)
         : Integer; override;
     end;
 
@@ -125,14 +129,14 @@ var
   topRight, correctedTopRight, pointA, pointB, pointC, pointD, maybeTopLeft,
     bottomLeft, bottomRight, topLeft, maybeBottomRight, point: IResultPoint;
 
-  cornerPoints: TArray<IResultPoint>;
+  cornerPoints: TIResultPointArray;
   bits: TBitMatrix;
   entry: TPair<IResultPoint, Integer>; // TKeyValuePair
   Transitions: TObjectList<TResultPointsAndTransitions>;
   lSideOne, lSideTwo, transBetween, transA, transB: TResultPointsAndTransitions;
   pointCount: TDictionary<IResultPoint, Integer>;
 
-  corners: TArray<IResultPoint>;
+  corners: TIResultPointArray;
 
   dimensionTop, dimensionRight, dimension, dimensionCorrected: Integer;
 begin
@@ -155,6 +159,7 @@ begin
   // as are B and C. Figure out which are the solid black lines
   // by counting transitions
   Transitions := TObjectList<TResultPointsAndTransitions>.Create;
+  //Transitions.OwnsObjects := True; // check todo ALF
   pointCount := TDictionary<IResultPoint, Integer>.Create();
   try
     Transitions.Add(transitionsBetween(pointA, pointB));
@@ -201,7 +206,7 @@ begin
       exit;
 
     // Bottom left is correct but top left and bottom right might be switched
-    corners := TArray<IResultPoint>.Create(maybeTopLeft, bottomLeft,
+    corners := TIResultPointArray.Create(maybeTopLeft, bottomLeft,
       maybeBottomRight);
     // Use the dot product trick to sort them out
     TResultPointHelpers.orderBestPatterns(corners);
@@ -281,7 +286,7 @@ begin
     else
     begin
       // The matrix is square
-      dimension := System.Math.Min(dimensionRight, dimensionTop);
+      dimension := Math.Min(dimensionRight, dimensionTop);
       // correct top right point to match the white module
       correctedTopRight := correctTopRight(bottomLeft, bottomRight, topLeft,
         topRight, dimension);
@@ -292,7 +297,7 @@ begin
       transA := transitionsBetween(topLeft, correctedTopRight);
       transB := transitionsBetween(bottomRight, correctedTopRight);
       dimensionCorrected :=
-        (System.Math.Max(transA.Transitions, transB.Transitions) + 1);
+        (Math.Max(transA.Transitions, transB.Transitions) + 1);
 
       transA.Free;
       transB.Free;
@@ -304,11 +309,15 @@ begin
         correctedTopRight, dimensionCorrected, dimensionCorrected);
     end;
 
+    corners:=nil;
+
     if (bits = nil) then
       exit;
 
-    Result := TDetectorResult.Create(bits, TArray<IResultPoint>.Create(topLeft,
-      bottomLeft, bottomRight, correctedTopRight));
+    corners := TIResultPointArray.Create(topLeft,
+      bottomLeft, bottomRight, correctedTopRight);
+
+    Result := TDetectorResult.Create(bits, corners);
 
   finally
     pointCount.Free;
@@ -610,7 +619,7 @@ begin
 end;
 
 function TDataMatrixDetector.TResultPointsAndTransitionsComparator.Compare
-  (const o1, o2: TResultPointsAndTransitions): Integer;
+  ({$ifdef FPC}constref{$else}const{$endif} o1, o2: TResultPointsAndTransitions): Integer;
 begin
   Result := (o1.Transitions - o2.Transitions);
 end;

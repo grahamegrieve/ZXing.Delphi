@@ -17,9 +17,16 @@ unit ZXing.StringUtils;
 
   * Implemented by E. Spelt for Delphi
 }
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses SysUtils, Generics.Collections, ZXing.DecodeHintType;
+uses
+  SysUtils,
+  Generics.Collections,
+  ZXing.DecodeHintType;
 
 type
 
@@ -35,7 +42,7 @@ type
     class var GB2312: string;
     class var SHIFT_JIS: string;
     class function guessEncoding(bytes: TArray<Byte>;
-      hints: TDictionary<TDecodeHintType, TObject>): string; static;
+      hints: THints): string; static;
 
   end;
 
@@ -47,15 +54,17 @@ begin
   SHIFT_JIS := 'SJIS';
   GB2312 := 'GB2312';
 
+  (*
+  //ALF
   ASSUME_SHIFT_JIS := (string.Compare(TStringUtils.SHIFT_JIS,
     TStringUtils.PLATFORM_DEFAULT_ENCODING, true) = 0) or
     (string.Compare('EUC-JP', TStringUtils.PLATFORM_DEFAULT_ENCODING,
     true) = 0);
-
+  *)
 end;
 
 class function TStringUtils.guessEncoding(bytes: TArray<Byte>;
-  hints: TDictionary<TDecodeHintType, TObject>): string;
+  hints: THints): string;
 
 var
   characterSet: string;

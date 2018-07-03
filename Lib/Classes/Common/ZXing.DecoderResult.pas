@@ -17,11 +17,16 @@ unit ZXing.DecoderResult;
 
   * Implemented by E. Spelt for Delphi
 }
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses SysUtils,
-     Generics.Collections,
-     ZXIng.ByteSegments;
+uses
+  SysUtils,
+  Generics.Collections,
+  ZXIng.ByteSegments;
 
 type
   TDecoderResult = class

@@ -19,17 +19,21 @@
 
 unit ZXing.QrCode.QRCodeReader;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Math,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
+  Math,
   ZXing.Common.BitArray,
   ZXing.ReadResult,
   ZXing.Reader,
   ZXing.DecodeHintType,
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.ResultPoint,
   ZXing.BinaryBitmap,
   ZXing.QrCode.Internal.Decoder,
@@ -48,7 +52,7 @@ type
   TQRCodeReader = class(TInterfacedObject, IReader)
   private
     FDecoder: TQRDecoder;
-    NO_POINTS: TArray<IResultPoint>;
+    NO_POINTS: TIResultPointArray;
 
     /// <summary>
     /// This method detects a code in a "pure" image -- that is, pure monochrome image
@@ -90,7 +94,7 @@ type
     /// String which the barcode encodes
     /// </returns>
     function decode(const image: TBinaryBitmap;
-      hints: TDictionary<TDecodeHintType, TObject>): TReadResult; overload;
+      hints: THints): TReadResult; overload;
 
     /// <summary>
     /// Resets any internal state the implementation has after a decode, to prepare it
@@ -100,6 +104,7 @@ type
   end;
 
 implementation
+
 uses ZXing.ByteSegments;
 
 { TQRCodeReader }
@@ -108,7 +113,7 @@ constructor TQRCodeReader.Create;
 begin
   inherited;
   FDecoder := TQRDecoder.Create;
-  NO_POINTS := TArray<IResultPoint>.Create();
+  NO_POINTS := TIResultPointArray.Create{$ifndef FPC}(){$endif};
 end;
 
 destructor TQRCodeReader.Destroy;
@@ -124,11 +129,11 @@ begin
 end;
 
 function TQRCodeReader.decode(const image: TBinaryBitmap;
-  hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  hints: THints): TReadResult;
 var
   DecoderResult: TDecoderResult;
   Detector: TDetector;
-  points: TArray<IResultPoint>;
+  points: TIResultPointArray;
   bits: TBitMatrix;
   DetectorResult: TDetectorResult;
   data: TQRCodeDecoderMetaData;

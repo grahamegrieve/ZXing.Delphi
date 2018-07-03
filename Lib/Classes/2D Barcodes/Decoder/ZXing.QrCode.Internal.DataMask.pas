@@ -20,11 +20,15 @@
 
 unit ZXing.QrCode.Internal.DataMask;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses 
-  SysUtils, 
-  ZXing.Common.BitMatrix, 
+uses
+  SysUtils,
+  ZXing.Common.BitMatrix,
   ZXing.Common.Detector.MathUtils;
 
 type

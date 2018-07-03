@@ -18,16 +18,20 @@
 
 unit ZXing.OneD.UPCEANExtension5Support;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
-uses 
-  System.SysUtils, 
-  System.Generics.Collections, 
-  System.Math,
+uses
+  SysUtils,
+  Generics.Collections,
+  Math,
   ZXing.Reader,
   ZXing.BinaryBitmap,
   ZXing.ReadResult,
-  ZXing.BarcodeFormat,
+  ZXing.BarCodeFormat,
   ZXing.DecodeHintType,
   ZXing.ResultMetadataType,
   ZXing.ResultPoint,
@@ -101,7 +105,7 @@ var
   ending : Integer;
   resultString : String;
   extensionData : TResultMetadata;
-  resultPoints : TArray<IResultPoint>;
+  resultPoints : TIResultPointArray;
   extensionResult : TReadResult;
 begin
   Result := nil;
@@ -115,7 +119,7 @@ begin
 
   resultString := res.ToString;
   extensionData := parseExtensionString(resultString);
-  resultPoints := TArray<IResultPoint>.Create(
+  resultPoints := TIResultPointArray.Create(
     TResultPointHelpers.CreateResultPoint((extensionStartRange[0] + extensionStartRange[1]) div 2, rowNumber),
     TResultPointHelpers.CreateResultPoint(ending, rowNumber));
 

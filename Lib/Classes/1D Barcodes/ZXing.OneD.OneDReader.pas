@@ -19,11 +19,15 @@
 
 unit ZXing.OneD.OneDReader;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
   Math,
   ZXing.Reader,
   ZXing.BinaryBitmap,
@@ -54,27 +58,9 @@ type
     /// <param name="hints">Any hints that were requested</param>
     /// <returns>The contents of the decoded barcode</returns>
     function doDecode(const image: TBinaryBitmap;
-      hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+      hints: THints): TReadResult;
     class procedure InitializeClass; static;
   protected
-    class var INTEGER_MATH_SHIFT: Integer;
-    class var PATTERN_MATCH_RESULT_SCALE_FACTOR: Integer;
-
-    /// <summary>
-    /// Determines how closely a set of observed counts of runs of black/white values matches a given
-    /// target pattern. This is reported as the ratio of the total variance from the expected pattern
-    /// proportions across all pattern elements, to the length of the pattern.
-    /// </summary>
-    /// <param name="counters">observed counters</param>
-    /// <param name="pattern">expected pattern</param>
-    /// <param name="maxIndividualVariance">The most any counter can differ before we give up</param>
-    /// <returns>ratio of total variance between counters and pattern compared to total pattern size,
-    /// where the ratio has been multiplied by 256. So, 0 means no variance (perfect match); 256 means
-    /// the total variance between counters and patterns equals the pattern length, higher values mean
-    /// even more variance</returns>
-    class function patternMatchVariance(counters, pattern: TArray<Integer>;
-      maxIndividualVariance: Integer): Integer; static;
-
     /// <summary>
     /// Records the pattern in reverse.
     /// </summary>
@@ -99,6 +85,24 @@ type
       counters: TArray<Integer>; numCounters: Integer): Boolean;
       overload; static;
   public
+    class var INTEGER_MATH_SHIFT: Integer;
+    class var PATTERN_MATCH_RESULT_SCALE_FACTOR: Integer;
+
+      /// <summary>
+      /// Determines how closely a set of observed counts of runs of black/white values matches a given
+      /// target pattern. This is reported as the ratio of the total variance from the expected pattern
+      /// proportions across all pattern elements, to the length of the pattern.
+      /// </summary>
+      /// <param name="counters">observed counters</param>
+      /// <param name="pattern">expected pattern</param>
+      /// <param name="maxIndividualVariance">The most any counter can differ before we give up</param>
+      /// <returns>ratio of total variance between counters and pattern compared to total pattern size,
+      /// where the ratio has been multiplied by 256. So, 0 means no variance (perfect match); 256 means
+      /// the total variance between counters and patterns equals the pattern length, higher values mean
+      /// even more variance</returns>
+      class function patternMatchVariance(counters, pattern: TArray<Integer>;
+        maxIndividualVariance: Integer): Integer; static;
+
     /// <summary>
     /// Resets any internal state the implementation has after a decode, to prepare it
     /// for reuse.
@@ -126,7 +130,7 @@ type
     /// String which the barcode encodes
     /// </returns>
     function decode(const image: TBinaryBitmap;
-      hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+      hints: THints): TReadResult;
       overload; virtual;
 
     /// <summary>
@@ -153,7 +157,7 @@ type
     /// <see cref="Result"/>containing encoded string and start/end of barcode
     /// </returns>
     function decodeRow(const rowNumber: Integer; const row: IBitArray;
-      const hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+      const hints: THints): TReadResult;
       virtual; abstract;
   end;
 
@@ -173,13 +177,13 @@ begin
 end;
 
 function TOneDReader.decode(const image: TBinaryBitmap;
-  hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  hints: THints): TReadResult;
 var
   tryHarder, tryHarderWithoutRotation: Boolean;
   rotatedImage: TBinaryBitmap;
   metadata: TResultMetadata;
   orientation, height, i, l: Integer;
-  points: TArray<IResultPoint>;
+  points: TIResultPointArray;
 
 begin
   Result := doDecode(image, hints);
@@ -236,7 +240,7 @@ begin
 end;
 
 function TOneDReader.doDecode(const image: TBinaryBitmap;
-  hints: TDictionary<TDecodeHintType, TObject>): TReadResult;
+  hints: THints): TReadResult;
 
 var
   attempt, X, rowNumber, rowStepsAboveOrBelow, width, height, middle, rowStep,
@@ -244,7 +248,7 @@ var
   row: IBitArray;
   isAbove, hadResultPointCallBack: Boolean;
   ReadResult: TReadResult;
-  points: TArray<IResultPoint>;
+  points: TIResultPointArray;
   obj: TObject;
 begin
   width := image.width;

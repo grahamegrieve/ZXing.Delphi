@@ -19,6 +19,10 @@
 
 unit ZXing.QrCode.Internal.QRCodeDecoderMetaData;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses 
@@ -43,7 +47,7 @@ type
     /// Apply the result points' order correction due to mirroring.
     /// </summary>
     /// <param name="points">Array of points to apply mirror correction to.</param>
-    procedure applyMirroredCorrection(const points: TArray<IResultPoint>);
+    procedure applyMirroredCorrection(const points: TIResultPointArray);
 
     /// <summary>
     /// true if the QR Code was mirrored.
@@ -61,7 +65,7 @@ begin
 end;
 
 procedure TQRCodeDecoderMetaData.applyMirroredCorrection(
-  const points: TArray<IResultPoint>);
+  const points: TIResultPointArray);
 var
   bottomLeft: IResultPoint;
 begin

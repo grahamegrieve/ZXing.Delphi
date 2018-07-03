@@ -19,11 +19,15 @@
 
 unit ZXing.Datamatrix.Internal.Decoder;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
   ZXing.DecodeHintType,
   ZXing.Common.BitMatrix,
   ZXing.Datamatrix.Internal.BitMatrixParser,
@@ -34,6 +38,7 @@ uses
   ZXing.Datamatrix.Internal.DecodedBitStreamParser;
 
 type
+  TBooleanArray=TArray<boolean>;
   /// <summary>
   /// <p>The main class which implements Data Matrix Code decoding -- as opposed to locating and extracting
   /// the Data Matrix Code from an image.</p>
@@ -48,7 +53,7 @@ type
     function correctErrors(codewordBytes: TArray<Byte>;
       numDataCodewords: Integer): boolean;
     function decode(bits: TBitMatrix): TDecoderResult; overload;
-    function decode(image: TArray < TArray < boolean >> )
+    function decode(image: TArray <TBooleanArray> )
       : TDecoderResult; overload;
   end;
 
@@ -79,7 +84,7 @@ end;
 /// <exception cref="FormatException">if the Data Matrix Code cannot be decoded</exception>
 /// <exception cref="ChecksumException">if error correction fails</exception>
 /// </summary>
-function TDataMatrixDecoder.decode(image: TArray < TArray < boolean >> )
+function TDataMatrixDecoder.decode(image: TArray <TBooleanArray> )
   : TDecoderResult;
 var
   i, j: Integer;
@@ -98,6 +103,8 @@ begin
   end;
 
   Result := decode(bits);
+
+  bits.Free;
 end;
 
 /// <summary>
@@ -119,10 +126,9 @@ var
   codewordBytes: TArray<Byte>;
   numDataCodewords: Integer;
 begin
-  // Construct a parser and read version, error-correction level
-  parser := TBitMatrixParser.Create(bits);
-
   try
+    // Construct a parser and read version, error-correction level
+    parser := TBitMatrixParser.Create(bits);
 
     if (parser.Version = nil) then
     begin
@@ -148,7 +154,7 @@ begin
     begin
       Inc(totalBytes, db.numDataCodewords)
     end;
-    resultBytes := TArray<Byte>.Create();
+    resultBytes := TArray<Byte>.Create{$ifndef FPC}(){$endif};
     SetLength(resultBytes, totalBytes);
 
     // Error-correct and copy data blocks together into a stream of bytes
@@ -198,26 +204,33 @@ var
 begin
   numCodewords := Length(codewordBytes);
   // First read into an array of ints
-  codewordsInts := TArray<Integer>.Create();
-  SetLength(codewordsInts, numCodewords);
-  for i := 0 to Pred(numCodewords) do
-  begin
-    codewordsInts[i] := (codewordBytes[i] and $FF);
-  end;
-  numECCodewords := (Length(codewordBytes) - numDataCodewords);
-  if (not rsDecoder.decode(codewordsInts, numECCodewords)) then
-  begin
-    Result := false;
-    exit;
-  end;
-  // Copy back into array of bytes -- only need to worry about the bytes that were data
-  // We don't care about errors in the error-correction codewords
-  for i := 0 to Pred(numDataCodewords) do
-  begin
-    codewordBytes[i] := Byte(codewordsInts[i]);
-  end;
+  codewordsInts := TArray<Integer>.Create{$ifndef FPC}(){$endif};
 
-  Result := true;
+  try
+    SetLength(codewordsInts, numCodewords);
+
+    for i := 0 to Pred(numCodewords) do
+    begin
+      codewordsInts[i] := (codewordBytes[i] and $FF);
+    end;
+    numECCodewords := (Length(codewordBytes) - numDataCodewords);
+    if (not rsDecoder.decode(codewordsInts, numECCodewords)) then
+    begin
+      Result := false;
+      exit;
+    end;
+    // Copy back into array of bytes -- only need to worry about the bytes that were data
+    // We don't care about errors in the error-correction codewords
+    for i := 0 to Pred(numDataCodewords) do
+    begin
+      codewordBytes[i] := Byte(codewordsInts[i]);
+    end;
+
+    Result := true;
+
+  finally
+    codewordsInts:=nil;
+  end;
 end;
 
 end.

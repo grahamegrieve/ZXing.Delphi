@@ -19,11 +19,15 @@
 
 unit ZXing.QrCode.Internal.Decoder;
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
+  SysUtils,
+  Generics.Collections,
   ZXing.DecodeHintType,
   ZXing.Common.BitMatrix,
   ZXing.QrCode.Internal.BitMatrixParser,
@@ -56,7 +60,7 @@ type
       const numDataCodewords: Integer): Boolean;
 
     function decode(const parser: TBitMatrixParser;
-      const hints: TDictionary<TDecodeHintType, TObject>)
+      const hints: THints)
       : TDecoderResult; overload;
   public
     /// <summary>
@@ -75,7 +79,7 @@ type
     /// text and bytes encoded within the QR Code
     /// </returns>
     function decode(const image: TArray<TArray<Boolean>>;
-      const hints: TDictionary<TDecodeHintType, TObject>)
+      const hints: THints)
       : TDecoderResult; overload;
 
     /// <summary>
@@ -87,7 +91,7 @@ type
     /// text and bytes encoded within the QR Code
     /// </returns>
     function decode(const bits: TBitMatrix;
-      const hints: TDictionary<TDecodeHintType, TObject>)
+      const hints: THints)
       : TDecoderResult; overload;
   end;
 
@@ -115,7 +119,7 @@ begin
 
   numCodewords := Length(codewordBytes);
   // First read into an array of ints
-  codewordsInts := TArray<Integer>.Create();
+  codewordsInts := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(codewordsInts, numCodewords);
   for i := 0 to Pred(numCodewords) do
     codewordsInts[i] := (codewordBytes[i] and $FF);
@@ -133,7 +137,7 @@ begin
 end;
 
 function TQRDecoder.decode(const image: TArray<TArray<Boolean>>;
-  const hints: TDictionary<TDecodeHintType, TObject>): TDecoderResult;
+  const hints: THints): TDecoderResult;
 var
   dimension, i, j: Integer;
   bits: TBitMatrix;
@@ -152,7 +156,7 @@ begin
 end;
 
 function TQRDecoder.decode(const bits: TBitMatrix;
-  const hints: TDictionary<TDecodeHintType, TObject>): TDecoderResult;
+  const hints: THints): TDecoderResult;
 var
   parser: TBitMatrixParser;
 begin
@@ -202,7 +206,7 @@ begin
 end;
 
 function TQRDecoder.decode(const parser: TBitMatrixParser;
-  const hints: TDictionary<TDecodeHintType, TObject>): TDecoderResult;
+  const hints: THints): TDecoderResult;
 var
   DataBlock: TDataBlock;
   dataBlocks: TArray<TDataBlock>;
@@ -240,7 +244,7 @@ begin
   for DataBlock in dataBlocks do
     Inc(totalBytes, DataBlock.numDataCodewords);
 
-  resultBytes := TArray<Byte>.Create();
+  resultBytes := TArray<Byte>.Create{$ifndef FPC}(){$endif};
   SetLength(resultBytes, totalBytes);
   try
 
