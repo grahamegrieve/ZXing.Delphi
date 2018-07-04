@@ -357,11 +357,9 @@ end;
 
 destructor TGenericGFPoly.Destroy;
 begin
-  SetLength(Fcoefficients, 0);
+  //SetLength(Fcoefficients, 0);
   Fcoefficients := nil;
-
   Ffield := nil;
-
   inherited;
 end;
 

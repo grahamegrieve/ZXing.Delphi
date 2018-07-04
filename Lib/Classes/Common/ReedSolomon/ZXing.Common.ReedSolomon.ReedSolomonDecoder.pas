@@ -93,7 +93,6 @@ begin
 
     if (noError) then
     begin
-      syndromeCoefficients := nil;
       Result := true;
       Exit;
     end;
@@ -133,11 +132,14 @@ begin
     end;
 
   finally
-    //FreeAndNil(poly);
-    //FreeAndNil(syndrome);
-    if Assigned(errorLocations) then errorLocations:=nil;
-    if Assigned(errorLocations) then errorLocations:=nil;
-    if Assigned(errorMagnitudes) then errorMagnitudes := nil;
+    FreeAndNil(poly);
+    syndromeCoefficients:=nil;
+
+    // for FPC
+    //FreeAndNil(sigmaOmega);
+    FreeAndNil(syndrome);
+    errorLocations:=nil;
+    errorMagnitudes:=nil;
   end;
 
   Result := true;

@@ -380,6 +380,7 @@ begin
     exit;
   end;
 
+  // todo ALF: look into possible memory leak.
   l1 := (Abs((dimensionTop - transitionsBetween(topLeft, c1).Transitions)) +
     Abs((dimensionRight - transitionsBetween(bottomRight, c1).Transitions)));
   l2 := (Abs((dimensionTop - transitionsBetween(topLeft, c2).Transitions)) +

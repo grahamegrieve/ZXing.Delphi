@@ -42,6 +42,8 @@ uses
   ZXing.QrCode.Internal.DecodedBitStreamParser;
 
 type
+  TBooleanArray=TArray<Boolean>;
+
   /// <summary>
   /// <p>The main class which implements QR Code decoding -- as opposed to locating and extracting
   /// the QR Code from an image.</p>
@@ -78,7 +80,7 @@ type
     /// <returns>
     /// text and bytes encoded within the QR Code
     /// </returns>
-    function decode(const image: TArray<TArray<Boolean>>;
+    function decode(const image: TArray<TBooleanArray>;
       const hints: THints)
       : TDecoderResult; overload;
 
@@ -121,6 +123,7 @@ begin
   // First read into an array of ints
   codewordsInts := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(codewordsInts, numCodewords);
+
   for i := 0 to Pred(numCodewords) do
     codewordsInts[i] := (codewordBytes[i] and $FF);
   numECCodewords := Length(codewordBytes) - numDataCodewords;
@@ -136,7 +139,7 @@ begin
   Result := true;
 end;
 
-function TQRDecoder.decode(const image: TArray<TArray<Boolean>>;
+function TQRDecoder.decode(const image: TArray<TBooleanArray>;
   const hints: THints): TDecoderResult;
 var
   dimension, i, j: Integer;
@@ -276,7 +279,6 @@ begin
       ecLevel, hints);
 
   finally
-    FreeAndNil(formatInfo);
     resultBytes := nil;
     codewordBytes := nil;
     codeWords := nil;
