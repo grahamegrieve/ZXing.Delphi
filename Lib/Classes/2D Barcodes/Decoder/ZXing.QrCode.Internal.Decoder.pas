@@ -279,6 +279,7 @@ begin
       ecLevel, hints);
 
   finally
+    FreeAndNil(formatInfo); // this is not correct for all qr-codes : format-info is re-used with multiple tries !!!!
     resultBytes := nil;
     codewordBytes := nil;
     codeWords := nil;

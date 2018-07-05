@@ -40,13 +40,13 @@ type
   public
     function decode(received: TArray<Integer>; twoS: Integer): boolean;
   strict private
-    function findErrorLocations(errorLocator: TGenericGFPoly): TArray<Integer>;
+    function findErrorLocations(errorLocator: IGenericGFPoly): TArray<Integer>;
   strict private
-    function findErrorMagnitudes(errorEvaluator: TGenericGFPoly;
+    function findErrorMagnitudes(errorEvaluator: IGenericGFPoly;
       errorLocations: TArray<Integer>): TArray<Integer>;
   private
-    function runEuclideanAlgorithm(a: TGenericGFPoly; b: TGenericGFPoly;
-      pR: Integer): TGenericGFPolyArray;
+    function runEuclideanAlgorithm(a: IGenericGFPoly; b: IGenericGFPoly;
+      pR: Integer): TIGenericGFPolyArray;
 
   strict private
     field: TGenericGF;
@@ -65,15 +65,15 @@ function TReedSolomonDecoder.decode(received: TArray<Integer>;
   twoS: Integer): boolean;
 var
   i, eval, position: Integer;
-  poly, syndrome, sigma, omega: TGenericGFPoly;
-  sigmaOmega: TGenericGFPolyArray;
+  poly, syndrome, sigma, omega: IGenericGFPoly;
+  sigmaOmega: TIGenericGFPolyArray;
   errorLocations: TArray<Integer>;
 
   syndromeCoefficients, errorMagnitudes: TArray<Integer>;
   noError: boolean;
 begin
   syndrome := nil;
-  poly := TGenericGFPoly.Create(self.field, received);
+  poly := TGenericGFPoly.Create(self.Field, received);
 
   syndromeCoefficients := TArray<Integer>.Create{$ifndef FPC}(){$endif};
   SetLength(syndromeCoefficients, twoS);
@@ -132,21 +132,21 @@ begin
     end;
 
   finally
-    FreeAndNil(poly);
+    //FreeAndNil(poly);
     syndromeCoefficients:=nil;
 
     // for FPC
     //FreeAndNil(sigmaOmega);
-    FreeAndNil(syndrome);
-    errorLocations:=nil;
-    errorMagnitudes:=nil;
+    //FreeAndNil(syndrome);
+    //errorLocations:=nil;
+    //errorMagnitudes:=nil;
   end;
 
   Result := true;
 
 end;
 
-function TReedSolomonDecoder.findErrorLocations(errorLocator: TGenericGFPoly)
+function TReedSolomonDecoder.findErrorLocations(errorLocator: IGenericGFPoly)
   : TArray<Integer>;
 var
   numErrors, e, i: Integer;
@@ -186,7 +186,7 @@ begin
 
 end;
 
-function TReedSolomonDecoder.findErrorMagnitudes(errorEvaluator: TGenericGFPoly;
+function TReedSolomonDecoder.findErrorMagnitudes(errorEvaluator: IGenericGFPoly;
   errorLocations: TArray<Integer>): TArray<Integer>;
 var
   s, i, xiInverse, denominator, j, term, termPlus1: Integer;
@@ -234,16 +234,16 @@ begin
 
 end;
 
-function TReedSolomonDecoder.runEuclideanAlgorithm(a, b: TGenericGFPoly;
-  pR: Integer): TGenericGFPolyArray;
+function TReedSolomonDecoder.runEuclideanAlgorithm(a, b: IGenericGFPoly;
+  pR: Integer): TIGenericGFPolyArray;
 var
   temp, rLastLast, tLastLast, rLast, tLast, t, q, sigma, omega,
-    R: TGenericGFPoly;
+    R: IGenericGFPoly;
   denominatorLeadingTerm, dltInverse, degreeDiff, scale, inverse,
     sigmaTildeAtZero: Integer;
 
 begin
-
+  Result:=nil;
   if (a.Degree < b.Degree) then
   begin
     temp := a;
@@ -278,7 +278,7 @@ begin
     begin
       degreeDiff := (R.Degree - rLast.Degree);
       scale := self.field.multiply(R.getCoefficient(R.Degree), dltInverse);
-      q := q.addOrSubtract(self.field.buildMonomial(degreeDiff, scale));
+      q := q.addOrSubtract(self.Field.buildMonomial(degreeDiff, scale));
       R := R.addOrSubtract(rLast.multiplyByMonomial(degreeDiff, scale))
     end;
 
@@ -287,8 +287,9 @@ begin
     if (R.Degree >= rLast.Degree) then
     begin
       Result := nil;
-      Exit
-    end
+      Exit;
+    end;
+
   end;
 
   sigmaTildeAtZero := t.getCoefficient(0);
@@ -302,7 +303,7 @@ begin
   sigma := t.multiply(inverse);
   omega := R.multiply(inverse);
 
-  Result := TGenericGFPolyArray.Create(sigma, omega);
+  Result := TIGenericGFPolyArray.Create(sigma, omega);
 
 end;
 

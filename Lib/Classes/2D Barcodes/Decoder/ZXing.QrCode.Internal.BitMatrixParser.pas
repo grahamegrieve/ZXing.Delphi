@@ -115,7 +115,7 @@ end;
 
 destructor TBitMatrixParser.Destroy;
 begin
-  FreeAndNil(parsedFormatInfo);
+  //FreeAndNil(parsedFormatInfo);
   inherited;
 end;
 
@@ -270,7 +270,6 @@ begin
     Result := Self.parsedFormatInfo;
     exit;
   end;
-
   // Read top-left format info bits
   formatInfoBits1 := 0;
   for i := 0 to Pred(6) do

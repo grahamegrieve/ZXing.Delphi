@@ -31,8 +31,70 @@ uses
   SysUtils;
 
 type
-  TGenericGFPoly = class;
-  TGenericGFPolyArray=TArray<TGenericGFPoly>;
+
+  TGenericGF = class;
+  IGenericGFPoly = interface;
+  TIGenericGFPolyArray=TArray<IGenericGFPoly>;
+
+  IGenericGFPoly = interface
+    function get_Degree: Integer;
+    function get_isZero: boolean;
+
+    function get_coefficients: TArray<Integer>;
+    function get_Field: TGenericGF;
+
+    function addOrSubtract(other: IGenericGFPoly): IGenericGFPoly;
+    function divide(other: IGenericGFPoly): TIGenericGFPolyArray;
+    function evaluateAt(a: Integer): Integer;
+    function getCoefficient(degree: Integer): Integer;
+
+    function multiply(scalar: Integer): IGenericGFPoly; overload;
+    function multiply(other: IGenericGFPoly): IGenericGFPoly; overload;
+
+    function multiplyByMonomial(degree: Integer; coefficient: Integer)
+      : IGenericGFPoly;
+
+    function ToString: string;
+
+    property coefficients: TArray<Integer> read get_coefficients;
+    property degree: Integer read get_Degree;
+    property isZero: boolean read get_isZero;
+    property Field: TGenericGF read get_Field;
+  end;
+
+  TGenericGFPoly = class sealed (TInterfacedObject, IGenericGFPoly)
+  private
+    Fcoefficients: TArray<Integer>;
+    Ffield: TGenericGF;
+
+  public
+    function get_Degree: Integer;
+    function get_isZero: boolean;
+    function get_coefficients: TArray<Integer>;
+    function get_Field: TGenericGF;
+
+    property coefficients: TArray<Integer> read Fcoefficients;
+    property degree: Integer read get_Degree;
+    property isZero: boolean read get_isZero;
+    property Field: TGenericGF read Ffield;
+
+    constructor Create(Field: TGenericGF; coefficients: TArray<Integer>);
+    destructor Destroy(); override;
+    function addOrSubtract(other: IGenericGFPoly): IGenericGFPoly;
+    function divide(other: IGenericGFPoly): TIGenericGFPolyArray;
+    function evaluateAt(a: Integer): Integer;
+    function getCoefficient(degree: Integer): Integer;
+
+    function multiply(scalar: Integer): IGenericGFPoly; overload;
+    function multiply(other: IGenericGFPoly): IGenericGFPoly; overload;
+
+    function multiplyByMonomial(degree: Integer; coefficient: Integer)
+      : IGenericGFPoly;
+
+    function ToString: string; override;
+
+  end;
+
   /// <summary>
   ///   <p>This class contains utility methods for performing mathematical operations over
   /// the Galois Fields. Operations use a given primitive polynomial in calculations.</p>
@@ -45,14 +107,14 @@ type
     FexpTable: TArray<Integer>;
     FGeneratorBase: Integer;
     FlogTable: TArray<Integer>;
-    FZero: TGenericGFPoly;
-    FOne: TGenericGFPoly;
+    FZero: IGenericGFPoly;
+    FOne: IGenericGFPoly;
     Fprimitive: Integer;
     Fsize: Integer;
 
     function get_GeneratorBase: Integer;
-    function get_One: TGenericGFPoly;
-    function get_Zero: TGenericGFPoly;
+    function get_One: IGenericGFPoly;
+    function get_Zero: iGenericGFPoly;
     function get_Size: Integer;
 
     class function get_AZTEC_DATA_10: TGenericGF; static;
@@ -81,48 +143,18 @@ type
     class function addOrSubtract(a: Integer; b: Integer): Integer; static;
     function multiply(a: Integer; b: Integer): Integer;
     function buildMonomial(degree: Integer; coefficient: Integer)
-      : TGenericGFPoly;
+      : IGenericGFPoly;
     function log(a: Integer): Integer;
     function exp(a: Integer): Integer;
     function inverse(a: Integer): Integer;
 
     property GeneratorBase: Integer read get_GeneratorBase;
     property size: Integer read get_Size;
-    property One: TGenericGFPoly read get_One;
-    property Zero: TGenericGFPoly read get_Zero;
+    property One: IGenericGFPoly read get_One;
+    property Zero: IGenericGFPoly read get_Zero;
 
   end;
 
-  TGenericGFPoly = class sealed
-  private
-    Fcoefficients: TArray<Integer>;
-    Ffield: TGenericGF;
-
-  public
-    function get_Degree: Integer;
-    function get_isZero: boolean;
-
-    property coefficients: TArray<Integer> read Fcoefficients;
-    property degree: Integer read get_Degree;
-    property isZero: boolean read get_isZero;
-    property Field: TGenericGF read Ffield;
-
-    constructor Create(Field: TGenericGF; coefficients: TArray<Integer>);
-    destructor Destroy(); override;
-    function addOrSubtract(other: TGenericGFPoly): TGenericGFPoly;
-    function divide(other: TGenericGFPoly): TGenericGFPolyArray;
-    function evaluateAt(a: Integer): Integer;
-    function getCoefficient(degree: Integer): Integer;
-
-    function multiply(scalar: Integer): TGenericGFPoly; overload;
-    function multiply(other: TGenericGFPoly): TGenericGFPoly; overload;
-
-    function multiplyByMonomial(degree: Integer; coefficient: Integer)
-      : TGenericGFPoly;
-
-    function ToString: string; override;
-
-  end;
 
 implementation
 
@@ -194,8 +226,8 @@ end;
 
 destructor TGenericGF.Destroy;
 begin
-  FreeAndNil(FZero);
-  FreeAndNil(FOne);
+  //FreeAndNil(FZero);
+  //FreeAndNil(FOne);
   self.FexpTable := nil;
   self.FlogTable := nil;
   inherited;
@@ -206,7 +238,7 @@ begin
   Result := (a xor b)
 end;
 
-function TGenericGF.buildMonomial(degree, coefficient: Integer): TGenericGFPoly;
+function TGenericGF.buildMonomial(degree, coefficient: Integer): IGenericGFPoly;
 var
   coefficients: TArray<Integer>;
 begin
@@ -262,7 +294,7 @@ begin
   Result := FGeneratorBase;
 end;
 
-function TGenericGF.get_One: TGenericGFPoly;
+function TGenericGF.get_One: IGenericGFPoly;
 begin
   Result := FOne;
 end;
@@ -277,7 +309,7 @@ begin
   Result := Fsize;
 end;
 
-function TGenericGF.get_Zero: TGenericGFPoly;
+function TGenericGF.get_Zero: IGenericGFPoly;
 begin
   Result := FZero;
 end;
@@ -357,19 +389,23 @@ end;
 
 destructor TGenericGFPoly.Destroy;
 begin
-  //SetLength(Fcoefficients, 0);
-  Fcoefficients := nil;
-  Ffield := nil;
+  if Assigned(Fcoefficients) then
+  begin
+    SetLength(Fcoefficients, 0);
+    //Fcoefficients := nil;
+  end;
+  //if Assigned(Ffield) then Ffield.Free;
+  Ffield:=nil;
   inherited;
 end;
 
-function TGenericGFPoly.addOrSubtract(other: TGenericGFPoly): TGenericGFPoly;
+function TGenericGFPoly.addOrSubtract(other: IGenericGFPoly): IGenericGFPoly;
 var
   lengthDiff, i, y: Integer;
   smallerCoefficients, largerCoefficients, temp, sumDiff: TArray<Integer>;
 begin
 
-  if (not self.Ffield.Equals(other.Ffield)) then
+  if (not self.Field.Equals(other.Field)) then
     raise EArgumentException.Create
       ('GenericGFPolys do not have same GenericGF field');
 
@@ -414,13 +450,13 @@ begin
   Result := TGenericGFPoly.Create(self.Ffield, sumDiff);
 end;
 
-function TGenericGFPoly.divide(other: TGenericGFPoly): TGenericGFPolyArray;
+function TGenericGFPoly.divide(other: IGenericGFPoly): TIGenericGFPolyArray;
 var
-  term, quotient, remainder, iterationQuotient: TGenericGFPoly;
+  term, quotient, remainder, iterationQuotient: IGenericGFPoly;
   degreeDifference, denominatorLeadingTerm, scale,
     inverseDenominatorLeadingTerm: Integer;
 begin
-  if (not self.Ffield.Equals(other.Ffield)) then
+  if (not self.Field.Equals(other.Field)) then
     raise EArgumentException.Create
       ('GenericGFPolys do not have same GenericGF field');
 
@@ -438,12 +474,12 @@ begin
     scale := self.Ffield.multiply(remainder.getCoefficient(remainder.degree),
       inverseDenominatorLeadingTerm);
     term := other.multiplyByMonomial(degreeDifference, scale);
-    iterationQuotient := self.Ffield.buildMonomial(degreeDifference, scale);
+    iterationQuotient := self.Field.buildMonomial(degreeDifference, scale);
     quotient := quotient.addOrSubtract(iterationQuotient);
     remainder := remainder.addOrSubtract(term);
   end;
 
-  Result := TGenericGFPolyArray.Create(quotient, remainder);
+  Result := TIGenericGFPolyArray.Create(quotient, remainder);
 end;
 
 function TGenericGFPoly.evaluateAt(a: Integer): Integer;
@@ -498,19 +534,29 @@ begin
   Result := Fcoefficients[0] = 0;
 end;
 
-function TGenericGFPoly.multiply(other: TGenericGFPoly): TGenericGFPoly;
+function TGenericGFPoly.get_coefficients: TArray<Integer>;
+begin
+  Result:=Fcoefficients;
+end;
+
+function TGenericGFPoly.get_Field: TGenericGF;
+begin
+  Result:=Ffield;
+end;
+
+function TGenericGFPoly.multiply(other: IGenericGFPoly): IGenericGFPoly;
 var
   product, aCoefficients, bCoefficients: TArray<Integer>;
   aLength, bLength, i, aCoeff, j: Integer;
 begin
 
-  if (not self.Ffield.Equals(other.Ffield)) then
+  if (not self.Field.Equals(other.Field)) then
     raise EArgumentException.Create
       ('GenericGFPolys do not have same GenericGF field');
 
   if (self.isZero or other.isZero) then
   begin
-    Result := self.Ffield.Zero;
+    Result := self.Field.Zero;
     exit
   end;
 
@@ -539,7 +585,7 @@ begin
 
 end;
 
-function TGenericGFPoly.multiply(scalar: Integer): TGenericGFPoly;
+function TGenericGFPoly.multiply(scalar: Integer): IGenericGFPoly;
 var
   product: TArray<Integer>;
   size, i: Integer;
@@ -572,7 +618,7 @@ begin
 end;
 
 function TGenericGFPoly.multiplyByMonomial(degree, coefficient: Integer)
-  : TGenericGFPoly;
+  : IGenericGFPoly;
 var
   product: TArray<Integer>;
   size, i: Integer;
