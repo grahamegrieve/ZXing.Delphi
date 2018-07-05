@@ -1,5 +1,6 @@
 program DUnitXTest;
 
+{$UNDEF TESTINSIGHT}
 {$IFDEF CI}
 {$UNDEF TESTINSIGHT}
 {$ENDIF CI}
@@ -99,6 +100,7 @@ var
   logger : ITestLogger;
   nunitLogger : ITestLogger;
 begin
+ReportMemoryLeaksOnShutdown :=true;
 {$IFDEF TESTINSIGHT}
   TestInsight.DUnitX.RunRegisteredTests;
   exit;

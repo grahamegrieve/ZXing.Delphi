@@ -60,7 +60,8 @@ begin
        'QR code result Text Incorrect: ' + aScanresult.Text);
       FreeAndNil(aScanresult);
     end;
-    // From here a test set from: http://datagenetics.com/blog/november12013/index.html
+
+   // From here a test set from: http://datagenetics.com/blog/november12013/index.html
    // Please take a look of what QR can do for you
    // NOTE: some test are expected to fail and are setup as such.
 
@@ -362,6 +363,7 @@ begin
         aScanresult.Text);
      FreeAndNil(aScanresult);
    end;
+
 
    success := Decode(aScanResult,'QRHiddenInBottom.png', TBarcodeFormat.QR_CODE);
    if success then
@@ -817,7 +819,6 @@ var
   x0, x1, y0, y1: single;
 begin
    try
-
       success := Decode(aScanResult,'Code128.png', TBarcodeFormat.CODE_128);
       if success then
       begin
