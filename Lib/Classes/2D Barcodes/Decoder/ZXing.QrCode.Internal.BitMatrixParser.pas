@@ -44,7 +44,7 @@ type
 
     function copyBit(const i, j, versionBits: Integer): Integer;
   public
-    parsedFormatInfo: TFormatInformation;
+    parsedFormatInfo: IFormatInformation;
 
     constructor Create(const BitMatrix: TBitMatrix);
     destructor Destroy;override;
@@ -80,7 +80,7 @@ type
     /// <throws>  ReaderException if both format information locations cannot be parsed as </throws>
     /// <summary> the valid encoding of format information
     /// </summary>
-    function readFormatInformation: TFormatInformation;
+    function readFormatInformation: IFormatInformation;
 
     /// <summary> <p>Reads version information from one of its two locations within the QR Code.</p>
     ///
@@ -164,7 +164,7 @@ end;
 
 function TBitMatrixParser.readCodewords: TArray<Byte>;
 var
-  formatInfo: TFormatInformation;
+  formatInfo: IFormatInformation;
   dimension, resultOffset,
   currentByte, bitsRead,
   j, i, count, col: Integer;
@@ -258,7 +258,7 @@ begin
   end;
 end;
 
-function TBitMatrixParser.readFormatInformation: TFormatInformation;
+function TBitMatrixParser.readFormatInformation: IFormatInformation;
 var
   formatInfoBits1,
   formatInfoBits2,
@@ -290,7 +290,7 @@ begin
   for i := (dimension - 8) to Pred(dimension) do
     formatInfoBits2 := self.copyBit(i, 8, formatInfoBits2);
 
-  parsedFormatInfo := TFormatInformation.DecodeFormatInformation(formatInfoBits1, formatInfoBits2);
+  parsedFormatInfo := DecodeFormatInformation(formatInfoBits1, formatInfoBits2);
 
   if (parsedFormatInfo <> nil)
   then

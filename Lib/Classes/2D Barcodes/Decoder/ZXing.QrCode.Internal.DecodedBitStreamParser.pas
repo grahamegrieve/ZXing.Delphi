@@ -128,7 +128,7 @@ begin
   Result := nil;
 
   bits := TBitSource.Create(bytes);
-  res := TStringBuilder.Create(500);
+  res := TStringBuilder.Create(5000);
   byteSegments := ByteSegmentsCreate();
   byteSegments.Capacity := 1;
   symbolSequence := -1;

@@ -85,7 +85,7 @@ var
 
 begin
   bits := TBitSource.Create(bytes);
-  res := TStringBuilder.Create(100);
+  res := TStringBuilder.Create(5000);
   resultTrailer := TStringBuilder.Create(0);
   byteSegments :=  ByteSegmentsCreate;
 

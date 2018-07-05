@@ -214,7 +214,7 @@ var
   DataBlock: TDataBlock;
   dataBlocks: TArray<TDataBlock>;
   Version: TVersion;
-  formatInfo: TFormatInformation;
+  formatInfo: IFormatInformation;
   ecLevel: TErrorCorrectionLevel;
   codeWords, resultBytes, codewordBytes: TArray<Byte>;
   totalBytes, resultOffset, i, numDataCodewords: Integer;
@@ -239,17 +239,17 @@ begin
     exit;
   end;
 
-  // Separate into data blocks
-  dataBlocks := TDataBlock.getDataBlocks(codeWords, Version, ecLevel);
-
-  // Count total number of data bytes
-  totalBytes := 0;
-  for DataBlock in dataBlocks do
-    Inc(totalBytes, DataBlock.numDataCodewords);
-
-  resultBytes := TArray<Byte>.Create{$ifndef FPC}(){$endif};
-  SetLength(resultBytes, totalBytes);
   try
+    // Separate into data blocks
+    dataBlocks := TDataBlock.getDataBlocks(codeWords, Version, ecLevel);
+
+    // Count total number of data bytes
+    totalBytes := 0;
+    for DataBlock in dataBlocks do
+      Inc(totalBytes, DataBlock.numDataCodewords);
+
+    resultBytes := TArray<Byte>.Create{$ifndef FPC}(){$endif};
+    SetLength(resultBytes, totalBytes);
 
     resultOffset := 0;
 
@@ -272,19 +272,16 @@ begin
       DataBlock.Free;
     end;
 
-    dataBlocks := nil;
-
     // Decode the contents of that stream of bytes
     Result := TDecodedBitStreamParser.decode(resultBytes, Version,
       ecLevel, hints);
 
   finally
-    FreeAndNil(formatInfo); // this is not correct for all qr-codes : format-info is re-used with multiple tries !!!!
+    dataBlocks:=nil;
     resultBytes := nil;
     codewordBytes := nil;
     codeWords := nil;
   end;
-
 end;
 
 end.

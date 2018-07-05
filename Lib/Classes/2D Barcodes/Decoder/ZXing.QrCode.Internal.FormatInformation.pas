@@ -37,6 +37,18 @@ type
   {$ifndef FPC}
   PtrInt = integer;
   {$endif}
+
+
+  IFormatInformation = interface
+    function GetDataMask:Byte;
+    function GetErrorCorrectionLevel: TErrorCorrectionLevel;
+    function Equals(o: TObject): Boolean;
+     function GetHashCode: PtrInt;
+    property ErrorCorrectionLevel: TErrorCorrectionLevel read GetErrorCorrectionLevel;
+    property DataMask: Byte read GetDataMask;
+  end;
+
+
   /// <summary> <p>Encapsulates a QR Code's format information, including the data mask used and
   /// error correction level.</p>
   ///
@@ -45,50 +57,35 @@ type
   /// </seealso>
   /// <seealso cref="TErrorCorrectionLevel">
   /// </seealso>
-  TFormatInformation = class sealed
+  TFormatInformation = class sealed (TInterfacedObject, IFormatInformation)
   private
     FErrorCorrectionLevel: TErrorCorrectionLevel;
     FDataMask: Byte;
-
-  const
-    FORMAT_INFO_MASK_QR: Integer = $5412;
-
-    /// <summary> See ISO 18004:2006, Annex C, Table C.1</summary>
-    class var FORMAT_INFO_DECODE_LOOKUP: TArray<TIntegerArray>;
-
-    /// <summary> Offset i holds the number of 1 bits in the binary representation of i</summary>
-    class var BITS_SET_IN_HALF_BYTE: TIntegerArray;
-
-    class procedure InitializeClass; static;
-    class procedure FinalizeClass; static;
-
-    class function doDecodeFormatInformation(const maskedFormatInfo1,
-      maskedFormatInfo2: Integer): TFormatInformation; static;
+    function GetDataMask:Byte;
+    function GetErrorCorrectionLevel: TErrorCorrectionLevel;
   public
     constructor Create(const formatInfo: Integer);
-
     function Equals(o: TObject): Boolean; override;
     function GetHashCode: PtrInt; override;
-    class function numBitsDiffering(a, b: Integer): Integer; static;
-
-    /// <summary>
-    /// Decodes the format information.
-    /// </summary>
-    /// <param name="maskedFormatInfo1">format info indicator, with mask still applied</param>
-    /// <param name="maskedFormatInfo2">The masked format info2.</param>
-    /// <returns>
-    /// information about the format it specifies, or <code>null</code>
-    /// if doesn't seem to match any known pattern
-    /// </returns>
-    class function decodeFormatInformation(const maskedFormatInfo1,
-      maskedFormatInfo2: Integer): TFormatInformation; static;
-
     property ErrorCorrectionLevel: TErrorCorrectionLevel
       read FErrorCorrectionLevel;
     property DataMask: Byte read FDataMask;
   end;
 
+  function numBitsDiffering(a, b: Integer): Integer;
+  function DecodeFormatInformation(const maskedFormatInfo1, maskedFormatInfo2: Integer):IFormatInformation;
+
 implementation
+
+const
+  FORMAT_INFO_MASK_QR: Integer = $5412;
+
+var
+  /// <summary> See ISO 18004:2006, Annex C, Table C.1</summary>
+  FORMAT_INFO_DECODE_LOOKUP: TArray<TIntegerArray>;
+
+    /// <summary> Offset i holds the number of 1 bits in the binary representation of i</summary>
+  BITS_SET_IN_HALF_BYTE: TIntegerArray;
 
 { TFormatInformation }
 
@@ -99,74 +96,6 @@ begin
     (TMathUtils.Asr(formatInfo, 3) and $03);
   // Bottom 3 bits
   FDataMask := Byte(formatInfo and 7);
-end;
-
-class function TFormatInformation.decodeFormatInformation
-  (const maskedFormatInfo1, maskedFormatInfo2: Integer): TFormatInformation;
-var
-  formatInfo: TFormatInformation;
-begin
-  formatInfo := doDecodeFormatInformation(maskedFormatInfo1, maskedFormatInfo2);
-
-  if (formatInfo <> nil) then
-    Result := formatInfo
-  else
-    // Should return null, but, some QR codes apparently
-    // do not mask this info. Try again by actually masking the pattern
-    // first
-    Result := TFormatInformation.doDecodeFormatInformation
-      ((maskedFormatInfo1 xor FORMAT_INFO_MASK_QR),
-      (maskedFormatInfo2 xor FORMAT_INFO_MASK_QR));
-end;
-
-class function TFormatInformation.doDecodeFormatInformation
-  (const maskedFormatInfo1, maskedFormatInfo2: Integer): TFormatInformation;
-var
-  bestDifference, bestFormatInfo, bitsDifference, targetInfo: Integer;
-  decodeInfo: TIntegerArray;
-begin
-  Result := nil;
-
-  // Find the int in FORMAT_INFO_DECODE_LOOKUP with fewest bits differing
-  bestDifference := High(Integer);
-  bestFormatInfo := 0;
-
-  for decodeInfo in FORMAT_INFO_DECODE_LOOKUP do
-  begin
-    targetInfo := decodeInfo[0];
-    if ((targetInfo = maskedFormatInfo1) or (targetInfo = maskedFormatInfo2))
-    then
-    begin
-      // Found an exact match
-      Result := TFormatInformation.Create(decodeInfo[1]);
-      exit;
-    end;
-
-    bitsDifference := numBitsDiffering(maskedFormatInfo1, targetInfo);
-    if (bitsDifference < bestDifference) then
-    begin
-      bestFormatInfo := decodeInfo[1];
-      bestDifference := bitsDifference;
-    end;
-
-    if (maskedFormatInfo1 <> maskedFormatInfo2) then
-    begin
-      // also try the other option
-      bitsDifference := numBitsDiffering(maskedFormatInfo2, targetInfo);
-      if (bitsDifference < bestDifference) then
-      begin
-        bestFormatInfo := decodeInfo[1];
-        bestDifference := bitsDifference;
-      end;
-    end;
-  end;
-  // Hamming distance of the 32 masked codes is 7, by construction, so <= 3 bits
-  // differing means we found a match
-  if (bestDifference <= 3) then
-  begin
-    Result := TFormatInformation.Create(bestFormatInfo);
-    exit;
-  end;
 end;
 
 function TFormatInformation.Equals(o: TObject): Boolean;
@@ -187,7 +116,96 @@ begin
   Result := ((FErrorCorrectionLevel.ordinal shl 3) or FDataMask)
 end;
 
-class procedure TFormatInformation.InitializeClass;
+function TFormatInformation.GetDataMask:Byte;
+begin
+  result:=FDataMask;
+end;
+
+function TFormatInformation.GetErrorCorrectionLevel: TErrorCorrectionLevel;
+begin
+  result:=FErrorCorrectionLevel;
+end;
+
+function numBitsDiffering(a, b: Integer): Integer;
+begin
+  a := (a xor b); // a now has a 1 bit exactly where its bit differs with b's
+  // Count bits set quickly with a series of lookups:
+  Result := BITS_SET_IN_HALF_BYTE[(a and $0F)] + BITS_SET_IN_HALF_BYTE
+    [TMathUtils.Asr(UInt32(a), 4) and $0F] + BITS_SET_IN_HALF_BYTE
+    [TMathUtils.Asr(UInt32(a), 8) and $0F] + BITS_SET_IN_HALF_BYTE
+    [TMathUtils.Asr(UInt32(a), 12) and $0F] + BITS_SET_IN_HALF_BYTE
+    [TMathUtils.Asr(UInt32(a), 16) and $0F] + BITS_SET_IN_HALF_BYTE
+    [TMathUtils.Asr(UInt32(a), 20) and $0F] + BITS_SET_IN_HALF_BYTE
+    [TMathUtils.Asr(UInt32(a), 24) and $0F] + BITS_SET_IN_HALF_BYTE
+    [TMathUtils.Asr(UInt32(a), 28) and $0F];
+end;
+
+function decodeFormatInformation(const maskedFormatInfo1, maskedFormatInfo2: Integer): IFormatInformation;
+var
+  formatInfo: IFormatInformation;
+  function doDecodeFormatInformation(const maskedFormatInfo1, maskedFormatInfo2: Integer): IFormatInformation;
+  var
+    bestDifference, bestFormatInfo, bitsDifference, targetInfo: Integer;
+    decodeInfo: TIntegerArray;
+  begin
+    Result := nil;
+
+    // Find the int in FORMAT_INFO_DECODE_LOOKUP with fewest bits differing
+    bestDifference := High(Integer);
+    bestFormatInfo := 0;
+
+    for decodeInfo in FORMAT_INFO_DECODE_LOOKUP do
+    begin
+      targetInfo := decodeInfo[0];
+      if ((targetInfo = maskedFormatInfo1) or (targetInfo = maskedFormatInfo2))
+      then
+      begin
+        // Found an exact match
+        Result := TFormatInformation.Create(decodeInfo[1]);
+        exit;
+      end;
+
+      bitsDifference := numBitsDiffering(maskedFormatInfo1, targetInfo);
+      if (bitsDifference < bestDifference) then
+      begin
+        bestFormatInfo := decodeInfo[1];
+        bestDifference := bitsDifference;
+      end;
+
+      if (maskedFormatInfo1 <> maskedFormatInfo2) then
+      begin
+        // also try the other option
+        bitsDifference := numBitsDiffering(maskedFormatInfo2, targetInfo);
+        if (bitsDifference < bestDifference) then
+        begin
+          bestFormatInfo := decodeInfo[1];
+          bestDifference := bitsDifference;
+        end;
+      end;
+    end;
+    // Hamming distance of the 32 masked codes is 7, by construction, so <= 3 bits
+    // differing means we found a match
+    if (bestDifference <= 3) then
+    begin
+      Result := TFormatInformation.Create(bestFormatInfo);
+      exit;
+    end;
+  end;
+begin
+  formatInfo := doDecodeFormatInformation(maskedFormatInfo1, maskedFormatInfo2);
+
+  if (formatInfo <> nil) then
+    Result := formatInfo
+  else
+    // Should return null, but, some QR codes apparently
+    // do not mask this info. Try again by actually masking the pattern
+    // first
+    Result := doDecodeFormatInformation
+      ((maskedFormatInfo1 xor FORMAT_INFO_MASK_QR),
+      (maskedFormatInfo2 xor FORMAT_INFO_MASK_QR));
+end;
+
+procedure InitializeClass;
 begin
   SetLength(FORMAT_INFO_DECODE_LOOKUP, $20);
 
@@ -228,7 +246,7 @@ begin
     2, 3, 2, 3, 3, 4);
 end;
 
-class procedure TFormatInformation.FinalizeClass;
+procedure FinalizeClass;
 var
   i: Integer;
 begin
@@ -239,26 +257,10 @@ begin
   BITS_SET_IN_HALF_BYTE := nil;
 end;
 
-class function TFormatInformation.numBitsDiffering(a, b: Integer): Integer;
-begin
-  a := (a xor b); // a now has a 1 bit exactly where its bit differs with b's
-  // Count bits set quickly with a series of lookups:
-  Result := BITS_SET_IN_HALF_BYTE[(a and $0F)] + BITS_SET_IN_HALF_BYTE
-    [TMathUtils.Asr(UInt32(a), 4) and $0F] + BITS_SET_IN_HALF_BYTE
-    [TMathUtils.Asr(UInt32(a), 8) and $0F] + BITS_SET_IN_HALF_BYTE
-    [TMathUtils.Asr(UInt32(a), 12) and $0F] + BITS_SET_IN_HALF_BYTE
-    [TMathUtils.Asr(UInt32(a), 16) and $0F] + BITS_SET_IN_HALF_BYTE
-    [TMathUtils.Asr(UInt32(a), 20) and $0F] + BITS_SET_IN_HALF_BYTE
-    [TMathUtils.Asr(UInt32(a), 24) and $0F] + BITS_SET_IN_HALF_BYTE
-    [TMathUtils.Asr(UInt32(a), 28) and $0F];
-end;
-
 initialization
-
-TFormatInformation.InitializeClass;
+  InitializeClass;
 
 finalization
-
-TFormatInformation.FinalizeClass;
+  FinalizeClass;
 
 end.

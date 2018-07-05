@@ -590,7 +590,7 @@ begin
       exit
     end;
 
-    bitsDifference := TFormatInformation.numBitsDiffering(versionBits,
+    bitsDifference := numBitsDiffering(versionBits,
       targetVersion);
 
     if (bitsDifference < bestDifference) then

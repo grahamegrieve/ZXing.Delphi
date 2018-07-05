@@ -70,10 +70,19 @@
       <OtherUnitFiles Value="..\..\..\Lib;..\..\..\Lib\Classes;..\..\..\Lib\Classes\Common;..\..\..\Lib\Classes\Common\Detector;..\..\..\Lib\Classes\Filtering;..\..\..\Lib\Classes\1D Barcodes;..\..\..\Lib\Classes\2D Barcodes;..\..\..\Lib\Classes\2D Barcodes\Decoder;..\..\..\Lib\Classes\2D Barcodes\Detector;..\..\..\Lib\Classes\Common\ReedSolomon;graphics32\Source"/>
       <UnitOutputDirectory Value="libscompiled\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <IncludeAssertionCode Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
     <CodeGeneration>
-      <Optimizations>
-        <OptimizationLevel Value="0"/>
-      </Optimizations>
+      <Checks>
+        <IOChecks Value="True"/>
+        <RangeChecks Value="True"/>
+        <OverflowChecks Value="True"/>
+        <StackChecks Value="True"/>
+      </Checks>
+      <VerifyObjMethodCallValidity Value="True"/>
     </CodeGeneration>
     <Linking>
       <Debugging>

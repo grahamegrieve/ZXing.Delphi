@@ -153,7 +153,6 @@ var
   LuminanceSource, InvLuminanceSource: TLuminanceSource;
   HybridBinarizer: THybridBinarizer;
   BinaryBitmap: TBinaryBitmap;
-  x,y:integer;
 begin
   InvLuminanceSource := nil;
   LuminanceSource := nil;

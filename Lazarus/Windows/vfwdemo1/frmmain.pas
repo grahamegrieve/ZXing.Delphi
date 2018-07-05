@@ -112,7 +112,7 @@ begin
       end;
       if (ReadResult <> nil) then
       begin
-        MainForm.Memo1.Lines.Append(ReadResult.Text);
+        MainForm.Memo1.Lines.Append(InttoStr(MainForm.Memo1.Lines.Count)+':    '+ReadResult.Text);
       end;
     finally
       ReadResult.Free;
@@ -231,16 +231,17 @@ begin
   CapCreate;
   CapConnect;
   CapEnableViewer;
+  capSetCallbackOnFrame(FCapHandle,@OnFrame);
 end;
 
 procedure TMainForm.ScanClick(Sender: TObject);
 begin
   Memo1.Lines.Clear;
-  capSetCallbackOnFrame(FCapHandle,@OnFrame);
 end;
 
 procedure TMainForm.VideoDestroy(Sender: TObject);
 begin
+  capSetCallbackOnFrame(FCapHandle,nil);
   CapDisableViewer;
   CapDisconnect;
   CapDestroy;
@@ -252,6 +253,7 @@ procedure TMainForm.bConnectClick(Sender: TObject);
 begin
   CapConnect;
   CapEnableViewer;
+  capSetCallbackOnFrame(FCapHandle,@OnFrame);
 end;
 
 procedure TMainForm.bFormatClick(Sender: TObject);
