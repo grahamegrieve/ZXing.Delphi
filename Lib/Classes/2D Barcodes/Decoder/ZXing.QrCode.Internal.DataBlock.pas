@@ -136,7 +136,6 @@ begin
     end
   end;
 
-  numBlockCodewordsBytes := nil;
   // All blocks have the same amount of data, except that the last n
   // (where n may be 0) have 1 more byte. Figure out where these start.
   shorterBlocksTotalCodewords := Length(Result[0].codewords);

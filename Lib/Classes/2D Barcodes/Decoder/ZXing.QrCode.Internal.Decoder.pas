@@ -218,6 +218,7 @@ var
   ecLevel: TErrorCorrectionLevel;
   codeWords, resultBytes, codewordBytes: TArray<Byte>;
   totalBytes, resultOffset, i, numDataCodewords: Integer;
+  fError:boolean;
 begin
   Result := nil;
 
@@ -254,23 +255,28 @@ begin
     resultOffset := 0;
 
     // Error-correct and copy data blocks together into a stream of bytes
+    fError:=false;
     for DataBlock in dataBlocks do
     begin
-      codewordBytes := DataBlock.codeWords;
-      numDataCodewords := DataBlock.numDataCodewords;
-      if (not self.correctErrors(codewordBytes, numDataCodewords)) then
+      if (NOT fError) then
       begin
-        exit(nil);
-      end;
+        codewordBytes := DataBlock.codeWords;
+        numDataCodewords := DataBlock.numDataCodewords;
+        if (not self.correctErrors(codewordBytes, numDataCodewords)) then
+          fError:=true;
 
-      for i := 0 to Pred(numDataCodewords) do
-      begin
-        resultBytes[resultOffset] := codewordBytes[i];
-        Inc(resultOffset);
+        if NOT fError then
+        begin
+          for i := 0 to Pred(numDataCodewords) do
+          begin
+            resultBytes[resultOffset] := codewordBytes[i];
+            Inc(resultOffset);
+          end;
+        end;
       end;
-
       DataBlock.Free;
     end;
+    if fError then exit(nil);
 
     // Decode the contents of that stream of bytes
     Result := TDecodedBitStreamParser.decode(resultBytes, Version,

@@ -125,6 +125,7 @@ var
   DataBlock: TDataBlock;
   codewordBytes: TArray<Byte>;
   numDataCodewords: Integer;
+  fError:boolean;
 begin
   // Construct a parser and read version, error-correction level
   parser := TBitMatrixParser.Create(bits);
@@ -159,24 +160,29 @@ begin
     SetLength(resultBytes, totalBytes);
 
     // Error-correct and copy data blocks together into a stream of bytes
+    fError:=false;
     for j := 0 to Pred(dataBlocksCount) do
     begin
-      DataBlock := dataBlocks[j];
-      codewordBytes := DataBlock.codewords;
-      numDataCodewords := DataBlock.numDataCodewords;
-      if (not correctErrors(codewordBytes, numDataCodewords)) then
+      if (NOT fError) then
       begin
-        Result := nil;
-        exit;
-      end;
-      for i := 0 to Pred(numDataCodewords) do
-      begin
-        // De-interlace data blocks.
-        resultBytes[(i * dataBlocksCount) + j] := codewordBytes[i];
-      end;
+        DataBlock := dataBlocks[j];
+        codewordBytes := DataBlock.codewords;
+        numDataCodewords := DataBlock.numDataCodewords;
+        if (not correctErrors(codewordBytes, numDataCodewords)) then
+          fError:=true;
 
+        if (NOT fError) then
+        begin
+          for i := 0 to Pred(numDataCodewords) do
+          begin
+            // De-interlace data blocks.
+            resultBytes[(i * dataBlocksCount) + j] := codewordBytes[i];
+          end;
+        end;
+      end;
       DataBlock.Free;
     end;
+    if fError then exit(nil);
 
     // Decode the contents of that stream of bytes
     Result := TDecodedBitStreamParser.decode(resultBytes);
