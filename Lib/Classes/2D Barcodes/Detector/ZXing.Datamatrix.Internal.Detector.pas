@@ -337,6 +337,7 @@ var
   corr, norm, cos, sin: Single;
   c1, c2: IResultPoint;
   l1, l2: Integer;
+  transA, transB: TResultPointsAndTransitions;
 begin
   corr := (distance(bottomLeft, bottomRight) / dimensionTop);
   norm := distance(topLeft, topRight);
@@ -380,11 +381,19 @@ begin
     exit;
   end;
 
-  // todo ALF: look into possible memory leak.
-  l1 := (Abs((dimensionTop - transitionsBetween(topLeft, c1).Transitions)) +
-    Abs((dimensionRight - transitionsBetween(bottomRight, c1).Transitions)));
-  l2 := (Abs((dimensionTop - transitionsBetween(topLeft, c2).Transitions)) +
-    Abs((dimensionRight - transitionsBetween(bottomRight, c2).Transitions)));
+  transA := transitionsBetween(topLeft, c1);
+  transB := transitionsBetween(bottomRight, c1);
+  l1 := (Abs((dimensionTop - transA.Transitions)) +
+    Abs((dimensionRight - transB.Transitions)));
+  transA.Free;
+  transB.Free;
+
+  transA := transitionsBetween(topLeft, c2);
+  transB := transitionsBetween(bottomRight, c2);
+  l2 := (Abs((dimensionTop - transA.Transitions)) +
+    Abs((dimensionRight - transB.Transitions)));
+  transA.Free;
+  transB.Free;
 
   if (l1 <= l2) then
   begin

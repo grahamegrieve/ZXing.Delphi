@@ -127,24 +127,25 @@ var
   numDataCodewords: Integer;
   fError:boolean;
 begin
-  // Construct a parser and read version, error-correction level
-  parser := TBitMatrixParser.Create(bits);
-
-  if (parser.Version = nil) then
-  begin
-    Result := nil;
-    exit;
-  end;
-
-  // Read codewords
-  codewords := parser.readCodewords;
-  if (codewords = nil) then
-  begin
-    Result := nil;
-    exit;
-  end;
-
   try
+
+    // Construct a parser and read version, error-correction level
+    parser := TBitMatrixParser.Create(bits);
+
+    if (parser.Version = nil) then
+    begin
+      Result := nil;
+      exit;
+    end;
+
+    // Read codewords
+    codewords := parser.readCodewords;
+    if (codewords = nil) then
+    begin
+      Result := nil;
+      exit;
+    end;
+
     // Separate into data blocks
     dataBlocks := TDataBlock.getDataBlocks(codewords, parser.Version);
 

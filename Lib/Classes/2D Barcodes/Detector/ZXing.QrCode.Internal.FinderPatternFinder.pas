@@ -656,7 +656,6 @@ begin
   finally
     resultInfo := nil;
     stateCount := nil;
-    patternInfo := nil;
   end;
 end;
 
