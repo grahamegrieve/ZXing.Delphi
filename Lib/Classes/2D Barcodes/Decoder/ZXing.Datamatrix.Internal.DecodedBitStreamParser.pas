@@ -439,6 +439,8 @@ class function TDecodedBitStreamParser.decodeBase256Segment(bits: TBitSource;
 var
   i, Count, codewordPosition, d1: Integer;
   bytes: TArray<Byte>;
+  Enc:TEncoding;
+  s: string;
 begin
   // Figure out how long the Base 256 Segment is.
   codewordPosition := (1 + bits.ByteOffset); // position is 1-indexed
@@ -481,8 +483,15 @@ begin
     Inc(codewordPosition);
   end;
   byteSegments.Add(bytes);
+
   try
-    res.Append(TEncoding.GetEncoding('ISO-8859-1').GetString(bytes))
+    enc := TEncoding.GetEncoding('ISO-8859-1');
+    try
+      s := enc.GetString(bytes);
+      res.Append(s);
+    finally
+      FreeAndNil(enc);
+    end;
   except
     on uee: Exception do
       raise EInvalidOpException.Create

@@ -714,6 +714,7 @@ begin
      //IsTrue(aScanresult.Text.Equals('Beispiel f#252r Wikipedia'),
      //IsTrue(aScanresult.Text.Equals('Beispiel für Wikipedia'),
      'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
+     FreeAndNil(aScanresult);
    end;
 
    aFile:='dmc3.png';

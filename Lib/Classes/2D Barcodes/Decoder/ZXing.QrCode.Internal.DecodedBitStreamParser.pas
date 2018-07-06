@@ -386,6 +386,8 @@ var
   buffer: TArray<Byte>;
   offset, twoBytes,
   assembledTwoBytes: Integer;
+  Enc:TEncoding;
+  s: string;
 begin
   Result := false;
   // Don't crash trying to read more bits than we have available.
@@ -419,8 +421,13 @@ begin
   end;
 
   try
-    res.Append(Tencoding.GetEncoding(TStringUtils.GB2312).GetString(buffer, 0,
-      Length(buffer)))
+    enc := TEncoding.GetEncoding(TStringUtils.GB2312);
+    try
+      s := enc.GetString(buffer, 0,Length(buffer));
+      res.Append(s);
+    finally
+      FreeAndNil(enc);
+    end;
   except
     on E: Exception do
       exit;
@@ -434,6 +441,8 @@ var
   buffer: TArray<Byte>;
   twoBytes, offset,
   assembledTwoBytes: Integer;
+  Enc:TEncoding;
+  s: string;
 begin
   Result := false;
   // Don't crash trying to read more bits than we have available.
@@ -465,8 +474,13 @@ begin
   end;
 
   try
-    res.Append(Tencoding.GetEncoding(TStringUtils.SHIFT_JIS).GetString(buffer,
-      0, Length(buffer)))
+    enc := TEncoding.GetEncoding(TStringUtils.SHIFT_JIS);
+    try
+      s := enc.GetString(buffer, 0, Length(buffer));
+      res.Append(s);
+    finally
+      FreeAndNil(enc);
+    end;
   except
     on E: Exception do
       exit;
