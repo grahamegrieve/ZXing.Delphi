@@ -164,9 +164,9 @@ begin
     fError:=false;
     for j := 0 to Pred(dataBlocksCount) do
     begin
+      DataBlock := dataBlocks[j];
       if (NOT fError) then
       begin
-        DataBlock := dataBlocks[j];
         codewordBytes := DataBlock.codewords;
         numDataCodewords := DataBlock.numDataCodewords;
         if (not correctErrors(codewordBytes, numDataCodewords)) then

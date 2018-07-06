@@ -56,6 +56,11 @@
       <OtherUnitFiles Value="..\..\Lib;..\..\Lib\Classes;..\..\Lib\Classes\Common;..\..\Lib\Classes\Common\Detector;..\..\Lib\Classes\Filtering;..\..\Lib\Classes\1D Barcodes;..\..\Lib\Classes\2D Barcodes;..\..\Lib\Classes\2D Barcodes\Decoder;..\..\Lib\Classes\2D Barcodes\Detector;..\..\Lib\Classes\Common\ReedSolomon;graphics32\Source"/>
       <UnitOutputDirectory Value="libscompiled\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <CodeGeneration>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
+    </CodeGeneration>
     <Linking>
       <Options>
         <Win32>
@@ -68,7 +73,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="3">
+    <Exceptions Count="4">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -78,6 +83,9 @@
       <Item3>
         <Name Value="EFOpenError"/>
       </Item3>
+      <Item4>
+        <Name Value="FPImageException"/>
+      </Item4>
     </Exceptions>
   </Debugging>
 </CONFIG>

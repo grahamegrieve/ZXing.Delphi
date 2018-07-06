@@ -604,7 +604,7 @@ begin
           begin
             if (upperShift) then
             begin
-              res.Append(Char(cValue + 254));
+              res.Append(Char(cValue + 224));
               upperShift := false;
             end
             else

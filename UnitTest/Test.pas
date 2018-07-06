@@ -474,11 +474,10 @@ begin
 		Assert.IsTrue(result.Text.Equals('http://www.2D-IDent.com'),
 			'DataMatrix code result Text Incorrect: ' + result.Text);
 
-		// WRONG Encoding: How we can get the correct encoding (umlaut) here... :(
-		{ result := Decode('dmc2.png', TBarcodeFormat.DATA_MATRIX);
+		result := Decode('dmc2.png', TBarcodeFormat.DATA_MATRIX);
 			Assert.IsNotNull(result, ' Nil result ');
 			Assert.IsTrue(result.Text.Equals('Beispiel f'#$FC'r Wikipedia'),
-			'DataMatrix code result Text Incorrect: ' + result.Text); }
+			'DataMatrix code result Text Incorrect: ' + result.Text);
 
 		result := Decode('dmc3.png', TBarcodeFormat.DATA_MATRIX);
 		Assert.IsNotNull(result, ' Nil result ');

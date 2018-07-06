@@ -2,6 +2,7 @@ unit Test;
 
 {$IFDEF FPC}
   {$mode delphi}{$H+}
+  //{$CODEPAGE UTF8}
 {$ENDIF}
 
 interface
@@ -692,7 +693,7 @@ begin
      FreeAndNil(aScanresult);
    end;
    }
-
+   {
    aFile:='dmc1.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
@@ -702,16 +703,18 @@ begin
         'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
      FreeAndNil(aScanresult);
    end;
+   }
 
-   // WRONG Encoding: How we can get the correct encoding (umlaut) here... :(
-   {  aFile:='dmc2.png';
-      success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
-      if success then
-      begin
-        IsNotNull(aScanresult, ' Nil result ' + aFile);
-        IsTrue(aScanresult.Text.Equals('Beispiel f'#$FC'r Wikipedia'),
-        'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
-      end;}
+   aFile:='dmc2.png';
+   success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
+   if success then
+   begin
+     IsNotNull(aScanresult, ' Nil result ' + aFile);
+     IsTrue(aScanresult.Text.Equals('Beispiel f'#$FC'r Wikipedia'),
+     //IsTrue(aScanresult.Text.Equals('Beispiel f#252r Wikipedia'),
+     //IsTrue(aScanresult.Text.Equals('Beispiel für Wikipedia'),
+     'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
+   end;
 
    aFile:='dmc3.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
@@ -1261,9 +1264,13 @@ begin
       if Assigned(aMemo) then
       begin
         if Assigned(aResult) then
+          aMemo.Lines.Append(aResult.text);
+        {
+        if Assigned(aResult) then
           aMemo.Lines.Text:=aResult.text
         else
           aMemo.Lines.Text:='';
+        }
         aMemo.Invalidate;
       end;
       Application.ProcessMessages;
@@ -1312,9 +1319,11 @@ begin
       except
         on E:FPImageException do
         begin
+          {$ifndef GUI}
           writeln('Please note: FPC could not handle/load file '+ExtractFileName(fs)+'.');
           writeln('Tests with this file will be skipped.');
           FreeAndNil(result);
+          {$endif}
         end;
       end;
     end;

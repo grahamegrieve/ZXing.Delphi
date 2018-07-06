@@ -265,7 +265,7 @@ begin
         if (not self.correctErrors(codewordBytes, numDataCodewords)) then
           fError:=true;
 
-        if NOT fError then
+        if (NOT fError) then
         begin
           for i := 0 to Pred(numDataCodewords) do
           begin
