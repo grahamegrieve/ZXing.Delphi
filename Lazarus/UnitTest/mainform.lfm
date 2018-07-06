@@ -1,0 +1,55 @@
+object Form1: TForm1
+  Left = 547
+  Height = 224
+  Top = 185
+  Width = 432
+  Caption = 'Form1'
+  ClientHeight = 224
+  ClientWidth = 432
+  OnDestroy = FormDestroy
+  LCLVersion = '1.9.0.0'
+  object Image1: TImage
+    Left = 216
+    Height = 207
+    Top = 8
+    Width = 208
+    Stretch = True
+  end
+  object Button1: TButton
+    Left = 9
+    Height = 30
+    Top = 7
+    Width = 196
+    Caption = 'Button1'
+    OnClick = Button1Click
+    TabOrder = 0
+  end
+  object Memo1: TMemo
+    Left = 9
+    Height = 80
+    Top = 41
+    Width = 196
+    TabOrder = 1
+  end
+  object Edit1: TEdit
+    Left = 9
+    Height = 23
+    Top = 128
+    Width = 196
+    TabOrder = 2
+  end
+  object Edit2: TEdit
+    Left = 9
+    Height = 23
+    Top = 160
+    Width = 196
+    TabOrder = 3
+  end
+  object Edit3: TEdit
+    Left = 9
+    Height = 23
+    Top = 192
+    Width = 196
+    TabOrder = 4
+  end
+end

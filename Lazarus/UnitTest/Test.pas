@@ -7,7 +7,12 @@ unit Test;
 interface
 
 uses
-  SysUtils, Classes, fpcunit, testregistry,
+  SysUtils, Classes,
+  {$ifdef GUI}
+  Forms,
+  StdCtrls,
+  {$endif}
+  fpcunit, testregistry,
   ExtCtrls, Graphics,
   Generics.Collections,
   fpimage,
@@ -19,16 +24,23 @@ uses
 type
   TZXingLazarusTest = class(TTestCase)
     private
+      {$ifdef GUI}
+      aImage:TImage;
+      aMemo:TMemo;
+      {$endif}
       procedure IsNull(AObject: TObject; const AMessage: string);
       procedure IsNotNull(AObject: TObject; const AMessage: string);
       procedure IsTrue(ACondition: boolean; const AMessage: string);
       procedure AreEqual(Expected, Actual: string; something:boolean);
       procedure Contains(HayStack,Needle: string; something:boolean);
-    public
       function GetImage(Filename: string): TBitmap;
       function Decode(out aResult:TReadResult; const Filename: String; const CodeFormat: TBarcodeFormat;
                const additionalHints: THints = nil)
                : boolean;
+    public
+      {$ifdef GUI}
+      constructor Create(Image:TImage;Memo:TMemo);overload;
+      {$endif}
     published
       procedure AllCode39();
       procedure AllUpcA();
@@ -1235,14 +1247,43 @@ begin
    bmp := GetImage(Filename);
    if Assigned(bmp) then
    try
+     {$ifdef GUI}
+     if Assigned(aImage) then
+     begin
+       aImage.Picture.Bitmap.Assign(bmp);
+       aImage.Invalidate;
+     end;
+     {$endif}
       result:=true;
       ScanManager := TScanManager.Create(CodeFormat, additionalHints);
       aResult := ScanManager.Scan(bmp);
+      {$ifdef GUI}
+      if Assigned(aMemo) then
+      begin
+        if Assigned(aResult) then
+          aMemo.Lines.Text:=aResult.text
+        else
+          aMemo.Lines.Text:='';
+        aMemo.Invalidate;
+      end;
+      Application.ProcessMessages;
+      sleep(100);
+      {$endif}
+
    finally
       FreeAndNil(bmp);
       FreeAndNil(ScanManager);
    end;
 end;
+
+{$ifdef GUI}
+constructor TZXingLazarusTest.Create(Image:TImage;Memo:TMemo);
+begin
+  inherited Create;
+  aImage:=Image;
+  aMemo:=Memo;
+end;
+{$endif}
 
 function TZXingLazarusTest.GetImage(Filename: string): TBitmap;
 var
