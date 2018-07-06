@@ -15,8 +15,39 @@
       </XPManifest>
       <Icon Value="0"/>
     </General>
-    <BuildModes Count="1">
+    <BuildModes Count="2">
       <Item1 Name="Default" Default="True"/>
+      <Item2 Name="Linuxx64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="binscompiled\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="..\..\Lib;..\..\Lib\Classes;..\..\Lib\Classes\Common;..\..\Lib\Classes\Common\Detector;..\..\Lib\Classes\Filtering;..\..\Lib\Classes\1D Barcodes;..\..\Lib\Classes\2D Barcodes;..\..\Lib\Classes\2D Barcodes\Decoder;..\..\Lib\Classes\2D Barcodes\Detector;..\..\Lib\Classes\Common\ReedSolomon;graphics32\Source"/>
+            <UnitOutputDirectory Value="libscompiled\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dGUI"/>
+          </Other>
+        </CompilerOptions>
+      </Item2>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
@@ -56,12 +87,10 @@
       <OtherUnitFiles Value="..\..\Lib;..\..\Lib\Classes;..\..\Lib\Classes\Common;..\..\Lib\Classes\Common\Detector;..\..\Lib\Classes\Filtering;..\..\Lib\Classes\1D Barcodes;..\..\Lib\Classes\2D Barcodes;..\..\Lib\Classes\2D Barcodes\Decoder;..\..\Lib\Classes\2D Barcodes\Detector;..\..\Lib\Classes\Common\ReedSolomon;graphics32\Source"/>
       <UnitOutputDirectory Value="libscompiled\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <CodeGeneration>
-      <Optimizations>
-        <OptimizationLevel Value="0"/>
-      </Optimizations>
-    </CodeGeneration>
     <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+      </Debugging>
       <Options>
         <Win32>
           <GraphicApplication Value="True"/>
@@ -73,7 +102,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="4">
+    <Exceptions Count="5">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -86,6 +115,9 @@
       <Item4>
         <Name Value="FPImageException"/>
       </Item4>
+      <Item5>
+        <Name Value="EAssertionFailedError"/>
+      </Item5>
     </Exceptions>
   </Debugging>
 </CONFIG>

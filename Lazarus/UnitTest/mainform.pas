@@ -6,8 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  fpcunit,testregistry,
-  Test;
+  fpcunit, Test;
 
 type
 

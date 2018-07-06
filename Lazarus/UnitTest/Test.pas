@@ -728,22 +728,28 @@ begin
       // whith the actual local charset. if this is the case you will not see the accented letters in this comment
       // ASCII charset, you risk the compiler to generate the wrong utf8 string when compiling this source
       // ES: 2016/12/9 not working here. Checking on text instead.
-     IsTrue(aScanresult.Text.Contains('die libre'),
+     IsTrue(aScanresult.Text.Equals('Wikipédia, l''encyclopédie libre'),
+     //IsTrue(aScanresult.Text.Contains('die libre'),
         'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
      FreeAndNil(aScanresult);
    end;
 
-   {
-   aFile:='dmc4.png';
+   {aFile:='dmc4.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
    begin
      IsNotNull(aScanresult, ' Nil result ' + aFile);
-     IsTrue(aScanresult.Text.Equals('??'),
+     IsTrue(aScanresult.Text.Equals(
+       '1234567812345678123456781234567812345123456781234567812345678123'+
+       '4567812345123456781234567812345678123456781234512345678123456781'+
+       '2345678123456781234512345678123456781234567812345678123451234567'+
+       '8123456781234567812345678123451234567812345678123456781234567812'+
+       '3451234567812345612317821323112312213121231231123121231212312312'+
+       '3123123123123123212312312312312sdfgssdfsdf3423423ffwewerwerwwerw'+
+       '3r3rw3r12'),
      'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
      FreeAndNil(aScanresult);
-   end;
-   }
+   end;}
 
    aFile:='dmc5.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);

@@ -72,7 +72,7 @@
     </SearchPaths>
     <Linking>
       <Debugging>
-        <UseHeaptrc Value="True"/>
+        <GenerateDebugInfo Value="False"/>
       </Debugging>
       <Options>
         <Win32>
