@@ -108,7 +108,7 @@ var
 begin
   Result:=false;
   if ((x<0) or (y<0)) then exit;
-  offset := Trunc(y * FrowSize + (x / 32));
+  offset := (y * FrowSize + (x DIV 32));
   if (offset>=length(Fbits)) then exit;
   test:=(1 shl (x and $1F));
   result:=((Fbits[offset] AND test)=test);
@@ -119,7 +119,7 @@ var
   offset: integer;
 begin
   if ((x<0) or (y<0)) then exit;
-  offset := Trunc(y * FrowSize + (x / 32));
+  offset := (y * FrowSize + (x DIV 32));
   if (offset>=length(Fbits)) then exit;
   if (value) then
     Fbits[offset] := Fbits[offset] or (1 shl (x and $1F))
