@@ -195,7 +195,7 @@ type
 var
   x, y,
   offset : Integer;
-  r, g, b : integer;
+  r, g, b : byte;
   {$ifdef FPC}
   dx, dy : Integer;
   PixelColor:TFPColor;
@@ -243,9 +243,10 @@ begin
       if Assigned(lazBmp) then
       begin
         PixelColor:=lazBmp.Colors[x,y];
-        r:=PixelColor.red;
-        g:=PixelColor.green;
-        b:=PixelColor.blue;
+        // color is in high byte
+        r:=(PixelColor.red shr 8);
+        g:=(PixelColor.green shr 8);
+        b:=(PixelColor.blue shr 8);
       end
       else
       begin
@@ -254,8 +255,8 @@ begin
         b:=scanLine^.B;
         Inc(PByte(scanLine),dx);
       end;
-      //luminances[offset + x] := (TMathUtils.Asr(3482*r + 11721*g + 1181*b, 14) AND $FF);
-      luminances[offset + x] := (TMathUtils.Asr(RChannelWeight*r + GChannelWeight*g + BChannelWeight*b,ChannelWeight) AND $FF);
+      luminances[offset + x] := (TMathUtils.Asr(3482*r + 11721*g + 1181*b, 14) AND $FF);
+      //luminances[offset + x] := (TMathUtils.Asr(RChannelWeight*r + GChannelWeight*g + BChannelWeight*b,ChannelWeight) AND $FF);
     end;
   end;
   sourceBitmap.EndUpdate;

@@ -44,32 +44,41 @@ var
   ml:TStringList;
   i:integer;
 begin
-  if NOT Assigned(aTest) then
-    aTest:=TZXingLazarusTest.Create(Image1,Memo1);
-
   Edit1.Text:='';
   Edit2.Text:='';
   Edit3.Text:='';
-
-  aTestResult:=TTestResult.Create;
-
-  ml := TStringList.Create;
-  GetMethodList(TZXingLazarusTest, ml);
-  for i := 0 to ml.Count -1 do
+  if NOT Assigned(aTest) then
+    aTest:=TZXingLazarusTest.Create(Image1,Memo1);
+  if Assigned(aTest) then
   begin
-    aTest.TestName:=ml[i];
-    aTest.Run(aTestResult);
+    aTestResult:=TTestResult.Create;
+    try
+      ml := TStringList.Create;
+      try
+        GetMethodList(TZXingLazarusTest, ml);
+        for i := 0 to ml.Count -1 do
+        begin
+          aTest.TestName:=ml[i];
+          Memo1.Lines.Append('');
+          Memo1.Lines.Append('*******************');
+          Memo1.Lines.Append('Current test: '+aTest.TestName);
+          aTest.Run(aTestResult);
+        end;
+      finally
+        ml.Free;
+      end;
+      Edit1.Text:='Number of tests: '+InttoStr(aTestResult.RunTests);
+      Edit2.Text:='Number of failures: '+InttoStr(aTestResult.NumberOfFailures);
+      Edit3.Text:='Number of errors: '+InttoStr(aTestResult.NumberOfErrors);
+    finally
+      aTestResult.Free;
+    end;
   end;
-  ml.Free;
-  Edit1.Text:='Number of tests: '+InttoStr(aTestResult.RunTests);
-  Edit2.Text:='Number of failures: '+InttoStr(aTestResult.NumberOfFailures);
-  Edit3.Text:='Number of errors: '+InttoStr(aTestResult.NumberOfErrors);
-  aTestResult.Free;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
-  if NOT Assigned(aTest) then
+  if Assigned(aTest) then
     aTest.Free;
 end;
 

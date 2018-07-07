@@ -101,7 +101,7 @@ end;
 
 function TBitArrayImplementation.GetBit(i: Integer): Boolean;
 begin
-  Result := ((Fbits[TMathUtils.Asr(i, 5)]) and (1 shl (i and $1F))) <> 0;
+  Result := ((Fbits[i DIV 32]) and (1 shl (i and $1F))) <> 0;
 end;
 
 function TBitArrayImplementation.GetBits: TArray<Integer>;
@@ -125,10 +125,10 @@ begin
     Result := Fsize;
     exit;
   end;
-  bitsOffset := TMathUtils.Asr(from, 5);
+  bitsOffset := (from DIV 32);
   currentBits := Fbits[bitsOffset];
   // mask off lesser bits first
-  currentBits := currentBits and (not((1 shl (from and $1F)) - 1));
+  currentBits := currentBits and integer(($FFFFFFFF shl (from and $1F)));
   while (currentBits = 0) do
   begin
     Inc(bitsOffset);
@@ -164,11 +164,11 @@ begin
     Result := Fsize;
     exit;
   end;
-  bitsOffset := TMathUtils.Asr(from, 5);
+  bitsOffset := (from DIV 32);
   currentBits := not Fbits[bitsOffset];
 
   // mask off lesser bits first
-  currentBits := currentBits and (not( (1 shl (from and $1F)) - 1));
+  currentBits := currentBits and integer(($FFFFFFFF shl (from and $1F)));
   while (currentBits = 0) do
   begin
     Inc(bitsOffset);
@@ -205,7 +205,7 @@ function TBitArrayImplementation.numberOfTrailingZeros(num: Integer): Integer;
 var
   index: Integer;
 begin
-  index := (-num and num) mod 37;
+  index := (-1*int64(num) and Int64(num)) mod 37;
   if (index < 0) then
   begin
     index := index * -1;
@@ -264,7 +264,7 @@ var
 begin
   if (Value) then
   begin
-    index := TMathUtils.Asr(i, 5);
+    index := (i shr 5);
     Fbits[index] := Fbits[index] or 1 shl (i and $1F);
   end;
 end;

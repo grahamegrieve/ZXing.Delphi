@@ -104,39 +104,27 @@ implementation
 
 function TBitMatrix.getBit(x, y: Integer): Boolean;
 var
-  offset, v, bits, shift: Integer;
-  uBits: LongWord;
+  offset,test: Integer;
 begin
   Result:=false;
   if ((x<0) or (y<0)) then exit;
-  offset := y * FrowSize + TMathUtils.Asr(x, 5);
+  offset := Trunc(y * FrowSize + (x / 32));
   if (offset>=length(Fbits)) then exit;
-  try
-    bits := Fbits[offset];
-    uBits := LongWord(bits);
-    shift := (x and $1F);
-    v := TMathUtils.Asr(uBits, shift);
-    Result := (v and 1) <> 0;
-  except
-    Result := false;
-  end;
-
+  test:=(1 shl (x and $1F));
+  result:=((Fbits[offset] AND test)=test);
 end;
 
 procedure TBitMatrix.setBit(x, y: Integer; const value: Boolean);
 var
-  offset: NativeInt;
+  offset: integer;
 begin
+  if ((x<0) or (y<0)) then exit;
+  offset := Trunc(y * FrowSize + (x / 32));
+  if (offset>=length(Fbits)) then exit;
   if (value) then
-  begin
-    offset := y * FrowSize + TMathUtils.Asr(x, 5);
-    Fbits[offset] := Fbits[offset] or (1 shl (x and $1F));
-  end
+    Fbits[offset] := Fbits[offset] or (1 shl (x and $1F))
   else
-  begin
-    offset := Trunc(y * FrowSize + (x / 32));
     Fbits[offset] := Fbits[offset] and (not(1 shl (x and $1F)));
-  end;
 end;
 
 procedure TBitMatrix.clear;

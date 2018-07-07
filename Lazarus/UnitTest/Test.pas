@@ -65,6 +65,30 @@ var
   success:boolean;
 begin
   try
+    success := Decode(aScanResult,'qr1.png', TBarcodeFormat.QR_CODE);
+    if success then
+    begin
+      IsNotNull(aScanresult, ' Nil result ');
+      IsTrue(aScanresult.Text.Equals(
+       'SPD*1.0*ACC:CZ2301000000001010101010+KOMBCZPP*AM:12100.00*CC'+
+       ':CZK*DT:20160721*MSG:20160033 FIRMA  A.S.*X-VS:20160033*X-KS'+
+       ':0308*X-INV:SID%2A1.0%2AID:20160033%2ADD:20160707%2AMSG:Konz'+
+       'ultace 07/2016%2AON:2016/44%2AVII:CZ12345678%2AINI:12345678%'+
+       '2AVIR:CZ25568736%2AINR:25568736%2ADUZP:20160701%2ADPPD:20160'+
+       '701%2ATB0:10000.00%2AT0:2100.00%2AX-SW:iDoklad*'),
+       'QR code result Text Incorrect: ' + aScanresult.Text);
+      FreeAndNil(aScanresult);
+    end;
+
+    {success := Decode(aScanResult,'qr2.png', TBarcodeFormat.QR_CODE);
+    if success then
+    begin
+      IsNotNull(aScanresult, ' Nil result ');
+      IsTrue(aScanresult.Text.Equals(''),
+       'QR code result Text Incorrect: ' + aScanresult.Text);
+      FreeAndNil(aScanresult);
+    end;}
+
     success := Decode(aScanResult,'qrcode.png', TBarcodeFormat.QR_CODE);
     if success then
     begin
@@ -681,7 +705,6 @@ var
   aFile:string;
 begin
  try
-
    {
    aFile:='DatamatrixHiddenInBottom.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
@@ -693,7 +716,7 @@ begin
      FreeAndNil(aScanresult);
    end;
    }
-   {
+
    aFile:='dmc1.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
@@ -703,7 +726,6 @@ begin
         'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
      FreeAndNil(aScanresult);
    end;
-   }
 
    aFile:='dmc2.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
@@ -734,7 +756,9 @@ begin
      FreeAndNil(aScanresult);
    end;
 
-   {aFile:='dmc4.png';
+   // Not working yet
+   {
+   aFile:='dmc4.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
    begin
@@ -749,7 +773,8 @@ begin
        '3r3rw3r12'),
      'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
      FreeAndNil(aScanresult);
-   end;}
+   end;
+   }
 
    aFile:='dmc5.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
@@ -762,7 +787,7 @@ begin
      FreeAndNil(aScanresult);
    end;
 
-   aFile:='dmc6.png';
+   aFile:='dmc6.bmp';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
    begin
@@ -782,7 +807,7 @@ begin
      FreeAndNil(aScanresult);
    end;
 
-   aFile:='dmc8.png';
+   aFile:='dmc8.jpg';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
    begin
@@ -811,7 +836,7 @@ begin
      FreeAndNil(aScanresult);
    end;
 
-   aFile:='dmc8.png';
+   aFile:='dmc8.jpg';
    success := Decode(aScanResult,aFile, TBarcodeFormat.Auto);
    if success then
    begin

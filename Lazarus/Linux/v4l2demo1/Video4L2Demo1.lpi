@@ -68,6 +68,9 @@
       <TargetOS Value="linux"/>
     </CodeGeneration>
     <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+      </Debugging>
       <Options>
         <PassLinkerOptions Value="True"/>
         <LinkerOptions Value="--warn-unresolved-symbols"/>

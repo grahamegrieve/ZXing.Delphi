@@ -1,56 +1,61 @@
 object Form1: TForm1
   Left = 547
-  Height = 224
+  Height = 345
   Top = 185
-  Width = 432
+  Width = 596
   Caption = 'Form1'
-  ClientHeight = 224
-  ClientWidth = 432
+  ClientHeight = 345
+  ClientWidth = 596
   OnDestroy = FormDestroy
   LCLVersion = '1.9.0.0'
   object Image1: TImage
-    Left = 216
-    Height = 207
+    Left = 272
+    Height = 328
     Top = 8
-    Width = 208
+    Width = 316
+    Anchors = [akTop, akLeft, akRight, akBottom]
     Stretch = True
   end
   object Button1: TButton
     Left = 9
     Height = 30
     Top = 7
-    Width = 196
+    Width = 255
     Caption = 'Button1'
     OnClick = Button1Click
     TabOrder = 0
   end
   object Memo1: TMemo
     Left = 9
-    Height = 80
+    Height = 201
     Top = 41
-    Width = 196
+    Width = 255
+    Anchors = [akTop, akLeft, akBottom]
     ScrollBars = ssAutoBoth
     TabOrder = 1
   end
   object Edit1: TEdit
     Left = 9
     Height = 23
-    Top = 128
-    Width = 196
+    Top = 249
+    Width = 255
+    Anchors = [akLeft, akBottom]
     TabOrder = 2
   end
   object Edit2: TEdit
     Left = 9
     Height = 23
-    Top = 160
-    Width = 196
+    Top = 281
+    Width = 255
+    Anchors = [akLeft, akBottom]
     TabOrder = 3
   end
   object Edit3: TEdit
     Left = 9
     Height = 23
-    Top = 192
-    Width = 196
+    Top = 313
+    Width = 255
+    Anchors = [akLeft, akBottom]
     TabOrder = 4
   end
 end
