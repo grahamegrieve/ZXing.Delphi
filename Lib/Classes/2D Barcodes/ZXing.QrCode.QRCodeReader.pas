@@ -317,7 +317,7 @@ begin
   x := leftTopBlack[0];
   y := leftTopBlack[1];
 
-  inBlack := true;
+  inBlack := image[x, y];
   transitions := 0;
   while (((x < width) and (y < height))) do
   begin

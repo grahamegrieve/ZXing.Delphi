@@ -410,7 +410,8 @@ begin
 
   dx := Abs(toX - fromX);
   dy := Abs(toY - fromY);
-  error := TMathUtils.Asr(-dx, 1);
+  //error := TMathUtils.Asr(-dx, 1);
+  error := -1*dx;
   if (fromX < toX) then
     xstep := 1
   else
