@@ -462,12 +462,10 @@ var
 	result: TReadResult;
 begin
 	try
-
 		// Result := Decode('DatamatrixHiddenInBottom.png', TBarcodeFormat.DATA_MATRIX);
 		// Assert.IsNotNull(result, ' Nil result ');
 		// Assert.IsTrue(result.Text.Equals('http://www.2D-IDent.com'),
 		// 'DataMatrix code result Text Incorrect: ' + result.Text);
-		//
 
 		result := Decode('dmc1.png', TBarcodeFormat.DATA_MATRIX);
 		Assert.IsNotNull(result, ' Nil result ');
@@ -481,20 +479,20 @@ begin
 
 		result := Decode('dmc3.png', TBarcodeFormat.DATA_MATRIX);
 		Assert.IsNotNull(result, ' Nil result ');
-		// 'Wikipédia, l''encyclopédie libre':
-		// I escaped the above string because this source is not saved in UTF-8 format but in ascii, using the west european encoding
-		// if your don't have a west-european windows installation, all the editors you use would try to interpret the non-ascii characters
-		// whith the actual local charset. if this is the case you will not see the accented letters in this comment
-		// ASCII charset, you risk the compiler to generate the wrong utf8 string when compiling this source
-		// ES: 2016/12/9 not working here. Checking on text instead.
-		Assert.IsTrue(result.Text.Contains('die libre'),
+		Assert.IsTrue(result.Text.Equals('WikipÃ©dia, l''encyclopÃ©die libre'),
 			'DataMatrix code result Text Incorrect: ' + result.Text);
 
-		// Not working yet
-		{ result := Decode('dmc4.png', TBarcodeFormat.DATA_MATRIX);
+		result := Decode('dmc4.png', TBarcodeFormat.DATA_MATRIX);
 			Assert.IsNotNull(result, ' Nil result ');
-			Assert.IsTrue(result.Text.Equals('??'),
-			'DataMatrix code result Text Incorrect: ' + result.Text); }
+			Assert.IsTrue(result.Text.Equals(
+       '1234567812345678123456781234567812345123456781234567812345678123'+
+       '4567812345123456781234567812345678123456781234512345678123456781'+
+       '2345678123456781234512345678123456781234567812345678123451234567'+
+       '8123456781234567812345678123451234567812345678123456781234567812'+
+       '3451234567812345612317821323112312213121231231123121231212312312'+
+       '3123123123123123212312312312312sdfgssdfsdf3423423ffwewerwerwwerw'+
+       '3r3rw3r12'),
+			'DataMatrix code result Text Incorrect: ' + result.Text);
 
 		result := Decode('dmc5.png', TBarcodeFormat.DATA_MATRIX);
 		Assert.IsNotNull(result, ' Nil result ');
