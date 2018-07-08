@@ -573,7 +573,7 @@ begin
     inBlack := Fimage[fromY, fromX]
   else
     inBlack := Fimage[fromX, fromY];
-
+  isBlack := inBlack;
   X := fromX;
   Y := fromY;
   while ((X <> toX)) do
