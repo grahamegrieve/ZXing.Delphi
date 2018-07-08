@@ -339,7 +339,7 @@ var
   l1, l2: Integer;
   transA, transB: TResultPointsAndTransitions;
 begin
-  corr := (distance(bottomLeft, bottomRight) / dimensionTop);
+  corr := (distance(bottomLeft, bottomRight) / (2 * dimensionTop));
   norm := distance(topLeft, topRight);
   if (norm = 0) then
   begin
@@ -352,7 +352,7 @@ begin
   c1 := TResultPointHelpers.CreateResultPoint((topRight.X + (corr * cos)),
     (topRight.Y + (corr * sin)));
 
-  corr := (distance(bottomLeft, topLeft) / dimensionRight);
+  corr := (distance(bottomLeft, topLeft) / (2 * dimensionRight));
   norm := distance(bottomRight, topRight);
   if (norm = 0) then
   begin
@@ -403,6 +403,7 @@ begin
   begin
     Result := c2;
   end;
+
 end;
 
 /// <summary>
@@ -418,7 +419,7 @@ var
   l1, l2: Integer;
   transA, transB: TResultPointsAndTransitions;
 begin
-  corr := (distance(bottomLeft, bottomRight) / dimension);
+  corr := (distance(bottomLeft, bottomRight) / (2 * dimension));
   norm := distance(topLeft, topRight);
   if (norm = 0) then
   begin
@@ -431,7 +432,7 @@ begin
   c1 := TResultPointHelpers.CreateResultPoint((topRight.X + (corr * cos)),
     (topRight.Y + (corr * sin)));
 
-  corr := (distance(bottomLeft, topLeft) / dimension);
+  corr := (distance(bottomLeft, topLeft) / (2 * dimension));
   norm := distance(bottomRight, topRight);
   if (norm = 0) then
   begin
