@@ -1,0 +1,122 @@
+object Form2: TForm2
+  Left = 524
+  Height = 687
+  Top = 93
+  Width = 618
+  Caption = 'Form2'
+  ClientHeight = 687
+  ClientWidth = 618
+  LCLVersion = '1.9.0.0'
+  object btnCode128: TButton
+    Left = 24
+    Height = 41
+    Top = 24
+    Width = 193
+    Caption = 'Code 128'
+    OnClick = btnCode128Click
+    TabOrder = 0
+  end
+  object btnQRCode: TButton
+    Left = 24
+    Height = 41
+    Top = 264
+    Width = 193
+    Caption = 'QR Code'
+    OnClick = btnQRCodeClick
+    TabOrder = 5
+  end
+  object btnCode93: TButton
+    Left = 24
+    Height = 41
+    Top = 72
+    Width = 193
+    Caption = 'Code 93'
+    OnClick = btnCode93Click
+    TabOrder = 1
+  end
+  object btnITF: TButton
+    Left = 24
+    Height = 41
+    Top = 216
+    Width = 193
+    Caption = 'ITF'
+    OnClick = btnITFClick
+    TabOrder = 4
+  end
+  object btnDummy: TButton
+    Left = 24
+    Height = 41
+    Top = 504
+    Width = 193
+    Caption = 'Dummy'
+    OnClick = btnDummyClick
+    TabOrder = 10
+  end
+  object btnDataMatrix: TButton
+    Left = 24
+    Height = 41
+    Top = 312
+    Width = 193
+    Caption = 'DataMatrix'
+    OnClick = btnDataMatrixClick
+    TabOrder = 9
+  end
+  object btnEAN13: TButton
+    Left = 24
+    Height = 41
+    Top = 120
+    Width = 193
+    Caption = 'EAN13'
+    OnClick = btnEAN13Click
+    TabOrder = 3
+  end
+  object imgResult: TImage
+    Left = 232
+    Height = 481
+    Top = 24
+    Width = 369
+  end
+  object edResult: TEdit
+    Left = 232
+    Height = 23
+    Top = 520
+    Width = 369
+    TabOrder = 11
+  end
+  object btnEAN8: TButton
+    Left = 24
+    Height = 41
+    Top = 168
+    Width = 193
+    Caption = 'EAN8'
+    OnClick = btnEAN8Click
+    TabOrder = 2
+  end
+  object btnUPC_a: TButton
+    Left = 24
+    Height = 41
+    Top = 360
+    Width = 193
+    Caption = 'UPCA'
+    OnClick = btnUPC_aClick
+    TabOrder = 8
+  end
+  object btnUPCE: TButton
+    Left = 24
+    Height = 41
+    Top = 408
+    Width = 193
+    Caption = 'UPCE'
+    OnClick = btnUPCEClick
+    TabOrder = 7
+  end
+  object btnCode39: TButton
+    Left = 24
+    Height = 41
+    Top = 456
+    Width = 193
+    Caption = 'Code 39'
+    OnClick = btnCode39Click
+    TabOrder = 6
+  end
+end
