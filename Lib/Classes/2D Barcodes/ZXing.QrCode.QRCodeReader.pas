@@ -166,8 +166,8 @@ begin
         DetectorResult := Detector.detect(hints);
         if Assigned(DetectorResult) then
         begin
-          DecoderResult := Decoder.decode(DetectorResult.bits, hints);
           points := DetectorResult.points;
+          DecoderResult := Decoder.decode(DetectorResult.bits, hints);
           DetectorResult.Free;
         end
         else
@@ -178,32 +178,36 @@ begin
     end;
 
     if (DecoderResult = nil) then
-      exit;
-
-    // If the code was mirrored: swap the bottom-left and the top-right points.
-    data := TQRCodeDecoderMetaData(DecoderResult.Other);
-    if (data <> nil) then
-      data.applyMirroredCorrection(points);
-
-    Result := TReadResult.Create(DecoderResult.Text, DecoderResult.RawBytes,
-      points, TBarcodeFormat.QR_CODE);
-
-    byteSegments := DecoderResult.byteSegments;
-
-    if (byteSegments <> nil) then
-      Result.putMetadata(TResultMetadataType.BYTE_SEGMENTS,  TResultMetaData.CreateByteSegmentsMetadata(byteSegments));
-
-    if (Length(DecoderResult.ecLevel) <> 0) then
-      Result.putMetadata(TResultMetadataType.ERROR_CORRECTION_LEVEL, TResultMetaData.CreateStringMetadata(DecoderResult.ecLevel));
-
-    if (DecoderResult.StructuredAppend) then
     begin
-      Result.putMetadata(TResultMetadataType.STRUCTURED_APPEND_SEQUENCE,
-          TResultMetaData.CreateIntegerMetadata(DecoderResult.StructuredAppendSequenceNumber));
-      Result.putMetadata(TResultMetadataType.STRUCTURED_APPEND_PARITY,
-        TResultMetaData.CreateIntegerMetadata(DecoderResult.StructuredAppendParity))
-    end;
+      Result := TReadResult.Create('', nil,
+        points, TBarcodeFormat.QR_CODE);
+    end
+    else
+    begin
+      // If the code was mirrored: swap the bottom-left and the top-right points.
+      data := TQRCodeDecoderMetaData(DecoderResult.Other);
+      if (data <> nil) then
+        data.applyMirroredCorrection(points);
 
+      Result := TReadResult.Create(DecoderResult.Text, DecoderResult.RawBytes,
+        points, TBarcodeFormat.QR_CODE);
+
+      byteSegments := DecoderResult.byteSegments;
+
+      if (byteSegments <> nil) then
+        Result.putMetadata(TResultMetadataType.BYTE_SEGMENTS,  TResultMetaData.CreateByteSegmentsMetadata(byteSegments));
+
+      if (Length(DecoderResult.ecLevel) <> 0) then
+        Result.putMetadata(TResultMetadataType.ERROR_CORRECTION_LEVEL, TResultMetaData.CreateStringMetadata(DecoderResult.ecLevel));
+
+      if (DecoderResult.StructuredAppend) then
+      begin
+        Result.putMetadata(TResultMetadataType.STRUCTURED_APPEND_SEQUENCE,
+            TResultMetaData.CreateIntegerMetadata(DecoderResult.StructuredAppendSequenceNumber));
+        Result.putMetadata(TResultMetadataType.STRUCTURED_APPEND_PARITY,
+          TResultMetaData.CreateIntegerMetadata(DecoderResult.StructuredAppendParity))
+      end;
+    end;
   finally
 
     if Assigned(DecoderResult) then

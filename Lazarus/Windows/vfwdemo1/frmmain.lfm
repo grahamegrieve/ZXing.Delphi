@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 360
+  Left = 414
   Height = 494
-  Top = 145
+  Top = 152
   Width = 559
   HorzScrollBar.Page = 470
   VertScrollBar.Page = 347
@@ -16,7 +16,7 @@ object MainForm: TMainForm
     Height = 373
     Top = 104
     Width = 559
-    Align = alClient
+    Align = alBottom
     BevelOuter = bvLowered
     FullRepaint = False
     TabOrder = 0
@@ -33,12 +33,13 @@ object MainForm: TMainForm
   end
   object pControl: TPanel
     Left = 0
-    Height = 104
+    Height = 144
     Top = 0
     Width = 559
     Align = alTop
+    Anchors = [akTop, akLeft, akRight, akBottom]
     BevelInner = bvLowered
-    ClientHeight = 104
+    ClientHeight = 144
     ClientWidth = 559
     FullRepaint = False
     TabOrder = 1
@@ -89,24 +90,31 @@ object MainForm: TMainForm
       TabOrder = 3
     end
     object Scan: TButton
-      Left = 120
-      Height = 88
-      Top = 8
-      Width = 80
+      Left = 8
+      Height = 33
+      Top = 104
+      Width = 109
       Caption = 'Clear memo'
       OnClick = ScanClick
       TabOrder = 4
     end
     object Memo1: TMemo
-      Left = 208
-      Height = 88
+      Left = 128
+      Height = 128
       Top = 8
-      Width = 338
+      Width = 232
       Lines.Strings = (
         'Memo1'
       )
       ScrollBars = ssBoth
       TabOrder = 5
+    end
+    object Image1: TImage
+      Left = 376
+      Height = 128
+      Top = 8
+      Width = 168
+      Stretch = True
     end
   end
 end

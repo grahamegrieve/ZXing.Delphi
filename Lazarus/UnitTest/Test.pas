@@ -38,23 +38,23 @@ type
       function Decode(out aResult:TReadResult; const Filename: String; const CodeFormat: TBarcodeFormat;
                const additionalHints: THints = nil)
                : boolean;
-    public
-      {$ifdef GUI}
-      constructor Create(Image:TImage;Memo:TMemo);overload;
-      {$endif}
-    published
       procedure AllCode39();
       procedure AllUpcA();
       procedure AllUpcE;
       procedure AllQRCode;
       procedure All_PURE_QRCode;
-      procedure AllDataMatrixCode();
       procedure AllCode128();
       procedure AllCode93();
       procedure AllCodeITF;
       procedure AllCodeEAN8;
       procedure AllCodeEAN13;
       procedure AutoTypes();
+    public
+      {$ifdef GUI}
+      constructor Create(Image:TImage;Memo:TMemo);overload;
+      {$endif}
+    published
+      procedure AllDataMatrixCode();
   end;
 
 implementation
@@ -705,17 +705,6 @@ var
   aFile:string;
 begin
  try
-   {
-   aFile:='DatamatrixHiddenInBottom.png';
-   success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
-   if success then
-   begin
-     IsNotNull(aScanresult, ' Nil result ' + aFile);
-     IsTrue(aScanresult.Text.Equals('http://www.2D-IDent.com'),
-      'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
-     FreeAndNil(aScanresult);
-   end;
-   }
 
    aFile:='dmc1.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
@@ -724,6 +713,16 @@ begin
      IsNotNull(aScanresult, ' Nil result ' + aFile);
      IsTrue(aScanresult.Text.Equals('http://www.2D-IDent.com'),
         'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
+     FreeAndNil(aScanresult);
+   end;
+
+   aFile:='dmwikirotated.png';
+   success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
+   if success then
+   begin
+     IsNotNull(aScanresult, ' Nil result ' + aFile);
+     IsTrue(aScanresult.Text.Equals('Wikipédia, l''encyclopédie libre'),
+      'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
      FreeAndNil(aScanresult);
    end;
 
@@ -756,8 +755,6 @@ begin
      FreeAndNil(aScanresult);
    end;
 
-   // Not working yet
-   {
    aFile:='dmc4.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
@@ -774,7 +771,6 @@ begin
      'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
      FreeAndNil(aScanresult);
    end;
-   }
 
    aFile:='dmc5.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
@@ -1340,6 +1336,14 @@ begin
     {$else}
     fs := ExtractFileDir(ParamStr(0)) + '/../../../UnitTest/Images/' + Filename;
     {$endif}
+    if NOT FileExists(fs) then
+    begin
+      {$ifdef Windows}
+      fs := ExtractFileDir(ParamStr(0)) + '\Images\' + Filename;
+      {$else}
+      fs := ExtractFileDir(ParamStr(0)) + '/Images/' + Filename;
+      {$endif}
+    end;
     if FileExists(fs) then
     begin
       try

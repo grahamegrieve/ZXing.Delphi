@@ -75,6 +75,7 @@ object Form2: TForm2
     Height = 481
     Top = 24
     Width = 369
+    Stretch = True
   end
   object edResult: TEdit
     Left = 232

@@ -257,8 +257,8 @@ constructor TReadResult.Create(const text: String; const rawBytes: TArray<Byte>;
   const resultPoints: TIResultPointArray; const format: TBarcodeFormat;
   const timeStamp: TDateTime);
 begin
-  if ((text = '') and (rawBytes = nil)) then
-    raise EArgumentException.Create('Text and bytes are null.');
+  //if ((text = '') and (rawBytes = nil)) then
+  //  raise EArgumentException.Create('Text and bytes are null.');
 
   SetText(text);
   FRawBytes := rawBytes;

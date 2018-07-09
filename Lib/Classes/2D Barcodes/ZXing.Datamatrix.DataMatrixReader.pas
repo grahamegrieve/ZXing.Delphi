@@ -150,18 +150,21 @@ begin
     end;
 
     if (DecoderResult = nil) then
-      exit;
+      Result := TReadResult.Create('', nil,
+        points, TBarcodeFormat.DATA_MATRIX)
+    else
+      Result := TReadResult.Create(DecoderResult.Text, DecoderResult.RawBytes,
+        points, TBarcodeFormat.DATA_MATRIX);
 
-    Result := TReadResult.Create(DecoderResult.Text, DecoderResult.RawBytes,
-      points, TBarcodeFormat.DATA_MATRIX);
 
-    ByteSegments := DecoderResult.ByteSegments;
-
-    if (ByteSegments <> nil) then
-      Result.putMetadata(TResultMetadataType.BYTE_SEGMENTS, TResultMetaData.CreateByteSegmentsMetadata( byteSegments));
-
-    if (Length(DecoderResult.ECLevel) <> 0) then
-      Result.putMetadata(TResultMetadataType.ERROR_CORRECTION_LEVEL, TResultMetaData.CreateStringMetadata(DecoderResult.ECLevel));
+    if (DecoderResult <> nil) then
+    begin
+      ByteSegments := DecoderResult.ByteSegments;
+      if (ByteSegments <> nil) then
+        Result.putMetadata(TResultMetadataType.BYTE_SEGMENTS, TResultMetaData.CreateByteSegmentsMetadata( byteSegments));
+      if (Length(DecoderResult.ECLevel) <> 0) then
+        Result.putMetadata(TResultMetadataType.ERROR_CORRECTION_LEVEL, TResultMetaData.CreateStringMetadata(DecoderResult.ECLevel));
+    end;
 
   finally
 

@@ -40,6 +40,7 @@ type
     bFormat: TButton;
     bReconnect: TButton;
     bQuality: TButton;
+    Image1: TImage;
     Memo1: TMemo;
     Scan: TButton;
     pControl: TPanel;
@@ -76,6 +77,7 @@ implementation
 {$R *.lfm}
 
 uses
+  ZXing.ResultPoint,
   UConvert,
   FPWriteBMP,
   dateutils;
@@ -87,6 +89,7 @@ var
   w, h: Integer;
   src, dest: Pointer;
   ReadResult: TReadResult;
+  ResultPoint:IResultPoint;
 begin
   Result:=1;
   FillChar(BitmapInfo{%H-}, SizeOf(BitmapInfo), 0);
@@ -99,7 +102,7 @@ begin
     Bitmap.SetSize(w,h);
     src:=lpVHdr^.lpData;
     dest:=Bitmap.ScanLine[0];
-    with bitmapinfo.bmiHeader do CodecToARGB(src, dest, w, h, biBitCount, biCompression);
+    with bitmapinfo.bmiHeader do CodecToBGRA(src, dest, w, h, biBitCount, biCompression);
     ReadResult := nil;
     try
       try
@@ -112,7 +115,23 @@ begin
       end;
       if (ReadResult <> nil) then
       begin
-        MainForm.Memo1.Lines.Append(InttoStr(MainForm.Memo1.Lines.Count)+':    '+ReadResult.Text);
+
+        if ReadResult.rawBytes<>nil then
+        begin
+          Bitmap.Canvas.Brush.Color := clLime;
+          MainForm.Memo1.Lines.Append(InttoStr(MainForm.Memo1.Lines.Count)+':    '+ReadResult.Text);
+        end
+        else
+          Bitmap.Canvas.Brush.Color := clRed;
+        Bitmap.Canvas.Brush.Style := bsSolid;
+        Bitmap.Canvas.Pen.Width   := 1;
+        Bitmap.Canvas.Pen.Color   := clBlack;
+        for ResultPoint in ReadResult.ResultPoints do
+          Bitmap.Canvas.Ellipse(TRect.Create(Round(ResultPoint.x - 20),
+                                             Round(ResultPoint.y - 20),
+                                             Round(ResultPoint.x + 20),
+                                             Round(ResultPoint.y + 20)));
+        MainForm.Image1.Picture.Bitmap.Assign(Bitmap);
       end;
     finally
       ReadResult.Free;

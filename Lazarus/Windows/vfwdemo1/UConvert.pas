@@ -21,15 +21,6 @@ const
   I420 = $30323449;
 
 type
-  PARGB = ^TARGB;
-  TARGB = packed record
-    case Byte of
-      1: (A, R, G, B: Byte);
-      2: (Color: LongWord);
-  end;
-  PARGBArray = ^TARGBArray;
-  TARGBArray = array[0..0] of TARGB;
-
   PBGRA = ^TBGRA;
   TBGRA = packed record
     case Byte of
@@ -59,9 +50,8 @@ type
     U, Y1, V, Y2: Byte;
   end;
 
-  function CodecToARGB(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
   function CodecToBGRA(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
-  function ARGBToCodec(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
+  function BGRAToCodec(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
 
   function Conv15To32(Color: Word): LongWord; overload;
   function Conv16To32(Color: Word): LongWord; overload;
@@ -69,59 +59,40 @@ type
   function Conv32To16(Color: LongWord): Word; overload;
   procedure Conv15To32(Src: PWord; Dest: PLongWord; Width, Height: Integer); overload;
   procedure Conv16To32(Src: PWord; Dest: PLongWord; Width, Height: Integer); overload;
-  procedure Conv24To32(Src: PRGB; Dest: PARGB; Width, Height: Integer);
+  procedure Conv24To32(Src: PRGB; Dest: PBGRA; Width, Height: Integer);
   procedure Conv32To15(Src: PLongWord; Dest: PWord; Width, Height: Integer); overload;
   procedure Conv32To16(Src: PLongWord; Dest: PWord; Width, Height: Integer); overload;
-  procedure Conv32To24(Src: PARGB; Dest: PRGB; Width, Height: Integer);
+  procedure Conv32To24(Src: PBGRA; Dest: PRGB; Width, Height: Integer);
 
-  function ARGBtoYUV(Color: LongWord): TYUV;
-  function YUVtoARGB(Y, U, V: Byte): TARGB;
-  procedure UYVYtoARGB(Src: PUYVY; Dest: PARGB; Width, Height: Integer);
-  procedure YUY2toARGB(Src: PYUY2; Dest: PARGB; Width, Height: Integer);
-  procedure I420toARGB(Src: PByte; Dest: PARGB; Width, Height: Integer);
-  procedure ARGBtoUYVY(Src: PARGB; Dest: PUYVY; Width, Height: Integer);
-  procedure ARGBtoYUY2(Src: PARGB; Dest: PYUY2; Width, Height: Integer);
-  procedure ARGBtoI420(Src: PARGB; Dest: PByte; Width, Height: Integer);
+  function BGRAtoYUV(Color: LongWord): TYUV;
+  function YUVtoBGRA(Y, U, V: Byte): TBGRA;
+  procedure UYVYtoBGRA(Src: PUYVY; Dest: PBGRA; Width, Height: Integer);
+  procedure YUY2toBGRA(Src: PYUY2; Dest: PBGRA; Width, Height: Integer);
+  procedure I420toBGRA(Src: PByte; Dest: PBGRA; Width, Height: Integer);
+  procedure BGRAtoUYVY(Src: PBGRA; Dest: PUYVY; Width, Height: Integer);
+  procedure BGRAtoYUY2(Src: PBGRA; Dest: PYUY2; Width, Height: Integer);
+  procedure BGRAtoI420(Src: PBGRA; Dest: PByte; Width, Height: Integer);
 
 implementation
-
-function CodecToARGB(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
-begin
-  Result:=True;
-  case Codec of
-    BI_RGB: case BitCount of
-              16: Conv16To32(src, dest, Width, Height);
-              24: Conv24To32(src, dest, Width, Height);
-              32: Move(src^, dest^, Width*Height*4);
-            end;
-    UYVY: UYVYtoARGB(src, dest, Width, Height);
-    YUY2: YUY2toARGB(src, dest, Width, Height);
-    I420: I420toARGB(src, dest, Width, Height);
-  else
-    Result:=False;
-  end;
-end;
 
 function CodecToBGRA(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
 begin
   Result:=True;
-  {
   case Codec of
     BI_RGB: case BitCount of
               16: Conv16To32(src, dest, Width, Height);
               24: Conv24To32(src, dest, Width, Height);
               32: Move(src^, dest^, Width*Height*4);
             end;
-    UYVY: UYVYtoARGB(src, dest, Width, Height);
-    YUY2: YUY2toARGB(src, dest, Width, Height);
-    I420: I420toARGB(src, dest, Width, Height);
+    UYVY: UYVYtoBGRA(src, dest, Width, Height);
+    YUY2: YUY2toBGRA(src, dest, Width, Height);
+    I420: I420toBGRA(src, dest, Width, Height);
   else
     Result:=False;
   end;
-  }
 end;
 
-function ARGBToCodec(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
+function BGRAToCodec(Src, Dest: Pointer; Width, Height: Integer; BitCount: Word; Codec: LongWord): Boolean;
 begin
   Result:=True;
   case Codec of
@@ -130,9 +101,9 @@ begin
               24: Conv32To24(src, dest, Width, Height);
               32: Move(src^, dest^, Width*Height*4);
             end;
-    UYVY: ARGBtoUYVY(src, dest, Width, Height);
-    YUY2: ARGBtoYUY2(src, dest, Width, Height);
-    I420: ARGBtoI420(src, dest, Width, Height);
+    UYVY: BGRAtoUYVY(src, dest, Width, Height);
+    YUY2: BGRAtoYUY2(src, dest, Width, Height);
+    I420: BGRAtoI420(src, dest, Width, Height);
   else
     Result:=False;
   end;
@@ -186,7 +157,7 @@ begin
   end;
 end;
 
-procedure Conv24To32(Src: PRGB; Dest: PARGB; Width, Height: Integer);
+procedure Conv24To32(Src: PRGB; Dest: PBGRA; Width, Height: Integer);
 var x: Integer;
 begin
   for x:=1 to Width*Height do begin
@@ -219,7 +190,7 @@ begin
   end;
 end;
 
-procedure Conv32To24(Src: PARGB; Dest: PRGB; Width, Height: Integer);
+procedure Conv32To24(Src: PBGRA; Dest: PRGB; Width, Height: Integer);
 var x: Integer;
 begin
   for x:=1 to Width*Height do begin
@@ -231,16 +202,16 @@ begin
   end;
 end;
 
-function ARGBtoYUV(Color: LongWord): TYUV;
+function BGRAtoYUV(Color: LongWord): TYUV;
 begin
-  with TARGB(Color), Result do begin
+  with TBGRA(Color), Result do begin
     Y:=( 66*R + 129*G +  25*B + 128) shr 8 + 16;
     U:=(-38*R -  74*G + 112*B + 128) shr 8 + 128;
     V:=(112*R -  94*G -  18*B + 128) shr 8 + 128;
   end;
 end;
 
-function YUVtoARGB(Y, U, V: Byte): TARGB;
+function YUVtoBGRA(Y, U, V: Byte): TBGRA;
 var ValueY, ValueU, ValueV, ValueR, ValueG, ValueB: Integer;
 begin
   ValueY:=Y-16;
@@ -259,35 +230,35 @@ begin
   end;
 end;
 
-procedure UYVYtoARGB(Src: PUYVY; Dest: PARGB; Width, Height: Integer);
+procedure UYVYtoBGRA(Src: PUYVY; Dest: PBGRA; Width, Height: Integer);
 var x: Integer;
 begin
   for x:=1 to Width*Height div 2 do begin
     with Src^ do begin
-      Dest^:=YUVtoARGB(Y1, U, V);
+      Dest^:=YUVtoBGRA(Y1, U, V);
       Inc(Dest);
-      Dest^:=YUVtoARGB(Y2, U, V);
+      Dest^:=YUVtoBGRA(Y2, U, V);
       Inc(Dest);
     end;
     Inc(Src);
   end;
 end;
 
-procedure YUY2toARGB(Src: PYUY2; Dest: PARGB; Width, Height: Integer);
+procedure YUY2toBGRA(Src: PYUY2; Dest: PBGRA; Width, Height: Integer);
 var x: Integer;
 begin
   for x:=1 to Width*Height div 2 do begin
     with Src^ do begin
-      Dest^:=YUVtoARGB(Y1, U, V);
+      Dest^:=YUVtoBGRA(Y1, U, V);
       Inc(Dest);
-      Dest^:=YUVtoARGB(Y2, U, V);
+      Dest^:=YUVtoBGRA(Y2, U, V);
       Inc(Dest);
     end;
     Inc(Src);
   end;
 end;
 
-procedure I420toARGB(Src: PByte; Dest: PARGB; Width, Height: Integer);
+procedure I420toBGRA(Src: PByte; Dest: PBGRA; Width, Height: Integer);
 var
   x, y, n: Integer;
   pY, pU, pV: PByte;
@@ -298,10 +269,10 @@ begin
   for y:=1 to Height div 2 do
     for n:=1 to 2 do begin
       for x:=1 to Width div 2 do begin
-        Dest^:=YUVtoARGB(pY^, pU^, pV^);
+        Dest^:=YUVtoBGRA(pY^, pU^, pV^);
         Inc(Dest);
         Inc(pY);
-        Dest^:=YUVtoARGB(pY^, pU^, pV^);
+        Dest^:=YUVtoBGRA(pY^, pU^, pV^);
         Inc(Dest);
         Inc(pY);
         Inc(pU);
@@ -314,15 +285,15 @@ begin
     end;
 end;
 
-procedure ARGBtoUYVY(Src: PARGB; Dest: PUYVY; Width, Height: Integer);
+procedure BGRAtoUYVY(Src: PBGRA; Dest: PUYVY; Width, Height: Integer);
 var
   YUV1, YUV2: TYUV;
   x: Integer;
 begin
   for x:=1 to Width*Height div 2 do begin
-    YUV1:=ARGBtoYUV(Src^.Color);
+    YUV1:=BGRAtoYUV(Src^.Color);
     Inc(Src);
-    YUV2:=ARGBtoYUV(Src^.Color);
+    YUV2:=BGRAtoYUV(Src^.Color);
     Inc(Src);
     Dest^.U:=(YUV1.U+YUV2.U) div 2;
     Dest^.Y1:=YUV1.Y;
@@ -332,15 +303,15 @@ begin
   end;
 end;
 
-procedure ARGBtoYUY2(Src: PARGB; Dest: PYUY2; Width, Height: Integer);
+procedure BGRAtoYUY2(Src: PBGRA; Dest: PYUY2; Width, Height: Integer);
 var
   YUV1, YUV2: TYUV;
   x: Integer;
 begin
   for x:=1 to Width*Height div 2 do begin
-    YUV1:=ARGBtoYUV(Src^.Color);
+    YUV1:=BGRAtoYUV(Src^.Color);
     Inc(Src);
-    YUV2:=ARGBtoYUV(Src^.Color);
+    YUV2:=BGRAtoYUV(Src^.Color);
     Inc(Src);
     Dest^.Y1:=YUV1.Y;
     Dest^.U:=(YUV1.U+YUV2.U) div 2;
@@ -350,27 +321,27 @@ begin
   end;
 end;
 
-procedure ARGBtoI420(Src: PARGB; Dest: PByte; Width, Height: Integer);
+procedure BGRAtoI420(Src: PBGRA; Dest: PByte; Width, Height: Integer);
 var
   x, y: Integer;
   YUV1, YUV2, YUV3, YUV4: TYUV;
   pY1, pY2, pU, pV: PByte;
-  pRGB1, pRGB2: PARGB;
+  pRGB1, pRGB2: PBGRA;
 begin
   pRGB1:=Src;
-  pRGB2:=PARGB(Integer(Src)+Width*4);
+  pRGB2:=PBGRA(Integer(Src)+Width*4);
   pY1:=Dest;
   pY2:=PByte(Integer(Dest)+Width);
   pU:=PByte(Integer(Dest)+Width*Height);
   pV:=PByte(Integer(pU)+Width*Height div 4);
   for y:=1 to Height div 2 do begin
     for x:=1 to Width div 2 do begin
-      YUV1:=ARGBtoYUV(pRGB1^.Color); Inc(pRGB1);
-      YUV2:=ARGBtoYUV(pRGB1^.Color); Inc(pRGB1);
+      YUV1:=BGRAtoYUV(pRGB1^.Color); Inc(pRGB1);
+      YUV2:=BGRAtoYUV(pRGB1^.Color); Inc(pRGB1);
       pY1^:=YUV1.Y; Inc(pY1);
       pY1^:=YUV2.Y; Inc(pY1);
-      YUV3:=ARGBtoYUV(pRGB2^.Color); Inc(pRGB2);
-      YUV4:=ARGBtoYUV(pRGB2^.Color); Inc(pRGB2);
+      YUV3:=BGRAtoYUV(pRGB2^.Color); Inc(pRGB2);
+      YUV4:=BGRAtoYUV(pRGB2^.Color); Inc(pRGB2);
       pY2^:=YUV3.Y; Inc(pY2);
       pY2^:=YUV4.Y; Inc(pY2);
       pU^:=(YUV1.U+YUV2.U+YUV3.U+YUV4.U) div 4; Inc(pU);
