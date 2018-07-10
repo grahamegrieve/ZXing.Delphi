@@ -167,7 +167,12 @@ begin
         if Assigned(DetectorResult) then
         begin
           points := DetectorResult.points;
-          DecoderResult := Decoder.decode(DetectorResult.bits, hints);
+          {$ifdef Debug}
+          if NOT Assigned(DetectorResult.bits) then
+            DecoderResult := nil
+          else
+            {$endif}
+            DecoderResult := Decoder.decode(DetectorResult.bits, hints);
           DetectorResult.Free;
         end
         else
@@ -179,8 +184,12 @@ begin
 
     if (DecoderResult = nil) then
     begin
-      Result := TReadResult.Create('', nil,
-        points, TBarcodeFormat.QR_CODE);
+    {$ifdef Debug}
+      Result := TReadResult.Create('QrCode detector error', nil,
+        points, TBarcodeFormat.QR_CODE)
+    {$else}
+      Result:=nil
+    {$endif}
     end
     else
     begin

@@ -60,7 +60,7 @@ end;
 destructor TDetectorResult.Destroy;
 begin
   FPoints := nil;
-  FBits.Free;
+  if Assigned(FBits) then FBits.Free;
   inherited;
 end;
 

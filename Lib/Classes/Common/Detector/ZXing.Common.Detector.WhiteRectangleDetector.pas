@@ -63,6 +63,9 @@ type
 
 implementation
 
+uses
+  Math;
+
 { TWhiteRectangleDetector }
 
 constructor TWhiteRectangleDetector.Create(image: TBitMatrix);
@@ -90,6 +93,13 @@ function TWhiteRectangleDetector.centerEdges(y: IResultPoint; z: IResultPoint;
 var
   yi, yj, zi, zj, xi, xj, ti, tj: Single;
 begin
+  {$ifdef Debug}
+  if NOT Assigned(y) then y:=TResultPointHelpers.CreateResultPoint(0,0);
+  if NOT Assigned(z) then z:=TResultPointHelpers.CreateResultPoint(0,0);
+  if NOT Assigned(x) then x:=TResultPointHelpers.CreateResultPoint(0,0);
+  if NOT Assigned(t) then t:=TResultPointHelpers.CreateResultPoint(0,0);
+  {$endif}
+
   yi := y.x;
   yj := y.y;
   zi := z.x;
@@ -99,18 +109,12 @@ begin
   ti := t.x;
   tj := t.y;
 
-  if (yi < (Self.width div 2)) then
-  begin
-    Result := TIResultPointArray.Create(TResultPointHelpers.CreateResultPoint((ti - 1), (tj + 1)
-      ), TResultPointHelpers.CreateResultPoint((zi + 1), (zj + 1)), TResultPointHelpers.CreateResultPoint((xi - 1),
-      (xj - 1)), TResultPointHelpers.CreateResultPoint((yi + 1), (yj - 1)));
-    exit;
-  end;
-
-  Result := TIResultPointArray.Create(TResultPointHelpers.CreateResultPoint((ti + 1), (tj + 1)),
-    TResultPointHelpers.CreateResultPoint((zi + 1), (zj - 1)), TResultPointHelpers.CreateResultPoint((xi - 1),
-    (xj + 1)), TResultPointHelpers.CreateResultPoint((yi - 1), (yj - 1)));
-
+  //move edges towards each other
+  Result := TIResultPointArray.Create(
+                TResultPointHelpers.CreateResultPoint((ti + CORR*sign(xi-ti)), (tj + CORR*sign(zj-tj))),
+                TResultPointHelpers.CreateResultPoint((zi + CORR*sign(yi-zi)), (zj + CORR*sign(tj-zj))),
+                TResultPointHelpers.CreateResultPoint((xi + CORR*sign(ti-xi)), (xj + CORR*sign(yi-xj))),
+                TResultPointHelpers.CreateResultPoint((yi + CORR*sign(zi-yi)), (yj + CORR*sign(xj-yj))));
 end;
 
 function TWhiteRectangleDetector.containsBlackPoint(a: Integer; b: Integer;
@@ -304,11 +308,13 @@ begin
       atLeastOneBlackPointFoundOnBorder := true;
   end;
 
+  {$ifndef Debug}
   if (not(not sizeExceeded and atLeastOneBlackPointFoundOnBorder)) then
   begin
     Result := nil;
     exit;
   end;
+  {$endif}
 
   maxSize := (right - left);
   i := 1;
@@ -320,11 +326,13 @@ begin
     Inc(i);
   end;
 
+  {$ifndef Debug}
   if (z = nil) then
   begin
     Result := nil;
     exit;
   end;
+  {$endif}
 
   i := 1;
   while ((i < maxSize)) do
@@ -335,11 +343,13 @@ begin
     Inc(i);
   end;
 
+  {$ifndef Debug}
   if (t = nil) then
   begin
     Result := nil;
     exit;
   end;
+  {$endif}
 
   i := 1;
   while ((i < maxSize)) do
@@ -350,11 +360,13 @@ begin
     Inc(i);
   end;
 
+  {$ifndef Debug}
   if (x = nil) then
   begin
     Result := nil;
     exit;
   end;
+  {$endif}
 
   y := nil;
   i := 1;
@@ -366,11 +378,13 @@ begin
     Inc(i);
   end;
 
+  {$ifndef Debug}
   if (y = nil) then
   begin
     Result := nil;
     exit;
   end;
+  {$endif}
 
   Result := Self.centerEdges(y, z, x, t);
 end;

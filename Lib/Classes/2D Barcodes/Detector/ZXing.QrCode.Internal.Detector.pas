@@ -332,8 +332,10 @@ begin
     transform.Free;
   end;
 
+  {$ifndef Debug}
   if (bits = nil) then
     exit;
+  {$endif}
 
   if (AlignmentPattern = nil) then
     points := TIResultPointArray.Create(bottomLeft, topLeft, topRight)

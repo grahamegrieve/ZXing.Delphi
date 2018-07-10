@@ -26,9 +26,6 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls,
   StdCtrls, ExtCtrls, Clipbrd, Buttons, fpimage,
   Generics.Collections,
-  ZXing.ReadResult,
-  ZXing.BarCodeFormat,
-  ZXing.DecodeHintType,
   ZXing.ScanManager;
 
 type
@@ -77,6 +74,9 @@ implementation
 {$R *.lfm}
 
 uses
+  ZXing.ReadResult,
+  ZXing.BarCodeFormat,
+  ZXing.DecodeHintType,
   ZXing.ResultPoint,
   UConvert,
   FPWriteBMP,
@@ -115,14 +115,16 @@ begin
       end;
       if (ReadResult <> nil) then
       begin
-
-        if ReadResult.rawBytes<>nil then
+        {$ifdef Debug}
+        if (ReadResult.rawBytes=nil) AND ((ReadResult.BarcodeFormat=TBarcodeFormat.DATA_MATRIX) OR (ReadResult.BarcodeFormat=TBarcodeFormat.QR_CODE))  then
+        {$else}
+        if false then
+        {$endif}
+        Bitmap.Canvas.Brush.Color := clRed else
         begin
           Bitmap.Canvas.Brush.Color := clLime;
           MainForm.Memo1.Lines.Append(InttoStr(MainForm.Memo1.Lines.Count)+':    '+ReadResult.Text);
-        end
-        else
-          Bitmap.Canvas.Brush.Color := clRed;
+        end;
         Bitmap.Canvas.Brush.Style := bsSolid;
         Bitmap.Canvas.Pen.Width   := 1;
         Bitmap.Canvas.Pen.Color   := clBlack;
@@ -246,7 +248,8 @@ begin
   //hints.Add(TDecodeHintType.POSSIBLE_FORMATS, nil);
   //FScanManager:=TScanManager.Create(TBarcodeFormat.EAN_13, hints);
   //FScanManager:=TScanManager.Create(TBarcodeFormat.QR_CODE, nil);
-  FScanManager:=TScanManager.Create(TBarcodeFormat.Auto, nil);
+  FScanManager:=TScanManager.Create(TBarcodeFormat.DATA_MATRIX, nil);
+  //FScanManager:=TScanManager.Create(TBarcodeFormat.Auto, nil);
   CapCreate;
   CapConnect;
   CapEnableViewer;

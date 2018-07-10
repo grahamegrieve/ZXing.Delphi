@@ -145,13 +145,23 @@ begin
       if (DetectorResult = nil) then
         exit;
 
-      DecoderResult := FDecoder.decode(DetectorResult.bits);
       points := DetectorResult.points;
+      {$ifdef Debug}
+      if NOT Assigned(DetectorResult.bits) then
+        DecoderResult := nil
+      else
+        {$endif}
+        DecoderResult := FDecoder.decode(DetectorResult.bits)
+
     end;
 
     if (DecoderResult = nil) then
-      Result := TReadResult.Create('', nil,
+    {$ifdef Debug}
+      Result := TReadResult.Create('DataMatrix detector error', nil,
         points, TBarcodeFormat.DATA_MATRIX)
+    {$else}
+      Result:=nil
+    {$endif}
     else
       Result := TReadResult.Create(DecoderResult.Text, DecoderResult.RawBytes,
         points, TBarcodeFormat.DATA_MATRIX);

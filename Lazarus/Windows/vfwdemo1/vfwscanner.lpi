@@ -84,6 +84,7 @@
       <Verbosity>
         <ShowHints Value="False"/>
       </Verbosity>
+      <CustomOptions Value="-dDebug"/>
     </Other>
   </CompilerOptions>
   <Debugging>

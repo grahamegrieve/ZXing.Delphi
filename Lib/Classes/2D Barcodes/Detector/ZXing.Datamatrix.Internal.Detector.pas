@@ -311,8 +311,10 @@ begin
 
     corners:=nil;
 
+    {$ifndef Debug}
     if (bits = nil) then
       exit;
+    {$endif}
 
     corners := TIResultPointArray.Create(topLeft,
       bottomLeft, bottomRight, correctedTopRight);

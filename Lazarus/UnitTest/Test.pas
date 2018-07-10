@@ -18,6 +18,7 @@ uses
   Generics.Collections,
   fpimage,
   ZXing.ReadResult,
+  ZXing.ResultPoint,
   ZXing.BarCodeFormat,
   ZXing.DecodeHintType,
   ZXing.ScanManager;
@@ -38,6 +39,11 @@ type
       function Decode(out aResult:TReadResult; const Filename: String; const CodeFormat: TBarcodeFormat;
                const additionalHints: THints = nil)
                : boolean;
+    public
+      {$ifdef GUI}
+      constructor Create(Image:TImage;Memo:TMemo);overload;
+      {$endif}
+    published
       procedure AllCode39();
       procedure AllUpcA();
       procedure AllUpcE;
@@ -49,11 +55,6 @@ type
       procedure AllCodeEAN8;
       procedure AllCodeEAN13;
       procedure AutoTypes();
-    public
-      {$ifdef GUI}
-      constructor Create(Image:TImage;Memo:TMemo);overload;
-      {$endif}
-    published
       procedure AllDataMatrixCode();
   end;
 
@@ -1273,18 +1274,12 @@ function TZXingLazarusTest.Decode(out aResult:TReadResult; const Filename: Strin
 var
    bmp: TBitmap;
    ScanManager: TScanManager;
+   ResultPoint:IResultPoint;
 begin
    result:=false;
    bmp := GetImage(Filename);
    if Assigned(bmp) then
    try
-     {$ifdef GUI}
-     if Assigned(aImage) then
-     begin
-       aImage.Picture.Bitmap.Assign(bmp);
-       aImage.Invalidate;
-     end;
-     {$endif}
       result:=true;
       ScanManager := TScanManager.Create(CodeFormat, additionalHints);
       aResult := ScanManager.Scan(bmp);
@@ -1292,14 +1287,32 @@ begin
       if Assigned(aMemo) then
       begin
         if Assigned(aResult) then
+        begin
           aMemo.Lines.Append(aResult.text);
-        {
-        if Assigned(aResult) then
-          aMemo.Lines.Text:=aResult.text
-        else
-          aMemo.Lines.Text:='';
-        }
-        aMemo.Invalidate;
+          aMemo.Invalidate;
+          {$ifdef Debug}
+          if (aResult.rawBytes=nil) AND ((aResult.BarcodeFormat=TBarcodeFormat.DATA_MATRIX) OR (aResult.BarcodeFormat=TBarcodeFormat.QR_CODE))  then
+          {$else}
+          if false then
+          {$endif}
+          bmp.Canvas.Brush.Color := clRed else
+          begin
+            bmp.Canvas.Brush.Color := clLime;
+          end;
+          bmp.Canvas.Brush.Style := bsSolid;
+          bmp.Canvas.Pen.Width   := 1;
+          bmp.Canvas.Pen.Color   := clBlack;
+          for ResultPoint in aResult.ResultPoints do
+          bmp.Canvas.Ellipse(TRect.Create(Round(ResultPoint.x - 5),
+                                             Round(ResultPoint.y - 5),
+                                             Round(ResultPoint.x + 5),
+                                             Round(ResultPoint.y + 5)));
+        end;
+        if Assigned(aImage) then
+        begin
+          aImage.Picture.Bitmap.Assign(bmp);
+          aImage.Invalidate;
+        end;
       end;
       Application.ProcessMessages;
       sleep(100);
