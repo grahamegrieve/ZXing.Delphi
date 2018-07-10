@@ -368,7 +368,6 @@ begin
   end;
   {$endif}
 
-  y := nil;
   i := 1;
   while ((i < maxSize)) do
   begin
@@ -392,10 +391,11 @@ end;
 function TWhiteRectangleDetector.getBlackPointOnSegment(aX: Single; aY: Single;
   bX: Single; bY: Single): IResultPoint;
 var
-  i, x, y, dist: Integer;
+  i, x, y, xtest,ytest, dist: Integer;
   xStep, yStep: Single;
 begin
   dist := TMathUtils.round(TMathUtils.distance(aX, aY, bX, bY));
+  if dist=0 then dist:=1;
   xStep := ((bX - aX) / dist);
   yStep := ((bY - aY) / dist);
   i := 0;
@@ -405,8 +405,14 @@ begin
     y := TMathUtils.round((aY + (i * yStep)));
     if (Self.image[x, y]) then
     begin
-      Result := TResultPointHelpers.CreateResultPoint(x, y);
-      exit;
+      // check again to prevent noisy results
+      xtest := TMathUtils.round((aX + ((i+1) * xStep)));
+      ytest := TMathUtils.round((aY + ((i+1) * yStep)));
+      if (Self.image[xtest, ytest]) then
+      begin
+        Result := TResultPointHelpers.CreateResultPoint(x, y);
+        exit;
+      end;
     end;
     Inc(i);
   end;
