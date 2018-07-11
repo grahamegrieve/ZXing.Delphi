@@ -46,6 +46,7 @@ type
   TDataMatrixDetector = class(TObject)
   private
   var
+    corners:TIResultPointArray;
     Fimage: TBitMatrix;
     FrectangleDetector: TWhiteRectangleDetector;
 
@@ -74,7 +75,7 @@ type
       function Compare({$ifdef FPC}constref{$else}const{$endif} o1, o2: TResultPointsAndTransitions)
         : Integer; override;
     end;
-
+    procedure NeedZ(Sender: TObject; AIndexX, AIndexY: Integer; var AValue:Double);
   var
     FtransCompare: TResultPointsAndTransitionsComparator;
   public
@@ -98,7 +99,18 @@ type
 
 implementation
 
+
+uses
+  Types,tacontour;
+
 { TDataMatrixDetector }
+
+procedure TDataMatrixDetector.NeedZ(Sender: TObject; AIndexX, AIndexY: Integer; var AValue:Double);
+begin
+  // here we need to limit the datapoints with the cornerpoints
+
+  AValue:=Ord(fImage[AIndexX, AIndexY]);
+end;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="Detector"/> class.
@@ -136,9 +148,13 @@ var
   lSideOne, lSideTwo, transBetween, transA, transB: TResultPointsAndTransitions;
   pointCount: TDictionary<IResultPoint, Integer>;
 
-  corners: TIResultPointArray;
+
 
   dimensionTop, dimensionRight, dimension, dimensionCorrected: Integer;
+
+  FContourFinder : TContourFinder;
+
+  aList:TList<TPointF>;
 begin
   Result := nil;
 
@@ -154,6 +170,30 @@ begin
   pointB := cornerPoints[1];
   pointC := cornerPoints[2];
   pointD := cornerPoints[3];
+
+  aList:=TList<TPointF>.Create;
+  FContourFinder := TContourFinder.Create(nil);
+  with FContourFinder do
+  begin
+    OnNeedZ := NeedZ;
+  end;
+  FContourFinder.Prepare(fImage.width, fImage.height);
+  FContourFinder.TraceContourAtLevel(1, aList);
+
+  corners := TIResultPointArray.Create{$ifndef FPC}(){$endif};
+  SetLength(corners,aList.Count);
+  dimensionCorrected:=0;
+  for dimension:=0 to aList.Count-1 do
+  begin
+    if IsNaN(aList[dimension].x) OR IsNaN(aList[dimension].y) then continue;
+    corners[dimensionCorrected]:=TResultPointHelpers.CreateResultPoint(aList[dimension].x,aList[dimension].y);
+    Inc(dimensionCorrected);
+  end;
+  SetLength(corners,dimensionCorrected);
+  Result := TDetectorResult.Create(nil, corners);
+  FContourFinder.Free;
+  aList.Free;
+  exit;
 
   // Point A and D are across the diagonal from one another,
   // as are B and C. Figure out which are the solid black lines

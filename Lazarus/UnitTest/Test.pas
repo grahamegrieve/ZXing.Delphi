@@ -39,11 +39,6 @@ type
       function Decode(out aResult:TReadResult; const Filename: String; const CodeFormat: TBarcodeFormat;
                const additionalHints: THints = nil)
                : boolean;
-    public
-      {$ifdef GUI}
-      constructor Create(Image:TImage;Memo:TMemo);overload;
-      {$endif}
-    published
       procedure AllCode39();
       procedure AllUpcA();
       procedure AllUpcE;
@@ -55,6 +50,11 @@ type
       procedure AllCodeEAN8;
       procedure AllCodeEAN13;
       procedure AutoTypes();
+    public
+      {$ifdef GUI}
+      constructor Create(Image:TImage;Memo:TMemo);overload;
+      {$endif}
+    published
       procedure AllDataMatrixCode();
   end;
 
@@ -706,7 +706,7 @@ var
   aFile:string;
 begin
  try
-
+   {
    aFile:='dmc1.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
@@ -716,7 +716,7 @@ begin
         'DataMatrix code result Text Incorrect: ' + aScanresult.Text);
      FreeAndNil(aScanresult);
    end;
-
+   }
    aFile:='dmwikirotated.png';
    success := Decode(aScanResult,aFile, TBarcodeFormat.DATA_MATRIX);
    if success then
@@ -1303,10 +1303,10 @@ begin
           bmp.Canvas.Pen.Width   := 1;
           bmp.Canvas.Pen.Color   := clBlack;
           for ResultPoint in aResult.ResultPoints do
-          bmp.Canvas.Ellipse(TRect.Create(Round(ResultPoint.x - 5),
-                                             Round(ResultPoint.y - 5),
-                                             Round(ResultPoint.x + 5),
-                                             Round(ResultPoint.y + 5)));
+          bmp.Canvas.Ellipse(TRect.Create(Round(ResultPoint.x - 1),
+                                             Round(ResultPoint.y - 1),
+                                             Round(ResultPoint.x + 1),
+                                             Round(ResultPoint.y + 1)));
         end;
         if Assigned(aImage) then
         begin

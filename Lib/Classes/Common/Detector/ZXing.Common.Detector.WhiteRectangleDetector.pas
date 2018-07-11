@@ -111,10 +111,11 @@ begin
 
   //move edges towards each other
   Result := TIResultPointArray.Create(
-                TResultPointHelpers.CreateResultPoint((ti + CORR*sign(xi-ti)), (tj + CORR*sign(zj-tj))),
+                TResultPointHelpers.CreateResultPoint((yi + CORR*sign(zi-yi)), (yj + CORR*sign(xj-yj))),
                 TResultPointHelpers.CreateResultPoint((zi + CORR*sign(yi-zi)), (zj + CORR*sign(tj-zj))),
                 TResultPointHelpers.CreateResultPoint((xi + CORR*sign(ti-xi)), (xj + CORR*sign(yi-xj))),
-                TResultPointHelpers.CreateResultPoint((yi + CORR*sign(zi-yi)), (yj + CORR*sign(xj-yj))));
+                TResultPointHelpers.CreateResultPoint((ti + CORR*sign(xi-ti)), (tj + CORR*sign(zj-tj)))
+                );
 end;
 
 function TWhiteRectangleDetector.containsBlackPoint(a: Integer; b: Integer;

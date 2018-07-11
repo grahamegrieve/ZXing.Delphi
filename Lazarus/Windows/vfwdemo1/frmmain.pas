@@ -127,12 +127,18 @@ begin
         end;
         Bitmap.Canvas.Brush.Style := bsSolid;
         Bitmap.Canvas.Pen.Width   := 1;
-        Bitmap.Canvas.Pen.Color   := clBlack;
+        Bitmap.Canvas.Pen.Color   := clRed;
+        w:=0;
         for ResultPoint in ReadResult.ResultPoints do
-          Bitmap.Canvas.Ellipse(TRect.Create(Round(ResultPoint.x - 20),
-                                             Round(ResultPoint.y - 20),
-                                             Round(ResultPoint.x + 20),
-                                             Round(ResultPoint.y + 20)));
+        begin
+          if (ResultPoint.x>=2) AND (ResultPoint.y>=2) then
+          begin
+            Bitmap.Canvas.Ellipse(TRect.Create(Round(ResultPoint.x - 2),
+                                               Round(ResultPoint.y - 2),
+                                               Round(ResultPoint.x + 2),
+                                               Round(ResultPoint.y + 2)));
+          end;
+        end;
         MainForm.Image1.Picture.Bitmap.Assign(Bitmap);
       end;
     finally
