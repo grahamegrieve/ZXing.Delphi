@@ -45,8 +45,14 @@ type
   /// </summary>
   TDataMatrixDetector = class(TObject)
   private
+  const
+    EXTRA_SIZE: Integer = 50;
+    RIGHTDOWN=0;
+    LEFTDOWN=1;
+    RIGHTUP=2;
+    LEFTUP=3;
   var
-    corners:TIResultPointArray;
+    cornerPoints:TIResultPointArray;
     Fimage: TBitMatrix;
     FrectangleDetector: TWhiteRectangleDetector;
 
@@ -101,15 +107,33 @@ implementation
 
 
 uses
-  Types,tacontour;
+  Types,
+  Unit_HoughTransformation,
+  TAContour;
 
 { TDataMatrixDetector }
 
 procedure TDataMatrixDetector.NeedZ(Sender: TObject; AIndexX, AIndexY: Integer; var AValue:Double);
+var
+  aResult:boolean;
+  aValidPoint:boolean;
 begin
   // here we need to limit the datapoints with the cornerpoints
+  aResult:=False;
+  aValidPoint:=True;
 
-  AValue:=Ord(fImage[AIndexX, AIndexY]);
+  //if (AIndexX<cornerPoints[LEFTDOWN].x-EXTRA_SIZE) AND (AIndexX<cornerPoints[LEFTUP].x-EXTRA_SIZE) AND (AIndexX<cornerPoints[RIGHTUP].x-EXTRA_SIZE) AND (AIndexX<cornerPoints[RIGHTDOWN].x-EXTRA_SIZE) then aValidPoint:=False;
+  //if (AIndexX>cornerPoints[LEFTDOWN].x+EXTRA_SIZE) AND (AIndexX>cornerPoints[LEFTUP].x+EXTRA_SIZE) AND (AIndexX>cornerPoints[RIGHTUP].x+EXTRA_SIZE) AND (AIndexX>cornerPoints[RIGHTDOWN].x+EXTRA_SIZE) then aValidPoint:=False;
+
+  //if (AIndexY<cornerPoints[LEFTDOWN].y-EXTRA_SIZE) AND (AIndexY<cornerPoints[LEFTUP].y-EXTRA_SIZE) AND (AIndexY<cornerPoints[RIGHTUP].y-EXTRA_SIZE) AND (AIndexY<cornerPoints[RIGHTDOWN].y-EXTRA_SIZE) then aValidPoint:=False;
+  //if (AIndexY>cornerPoints[LEFTDOWN].y+EXTRA_SIZE) AND (AIndexY>cornerPoints[LEFTUP].y+EXTRA_SIZE) AND (AIndexY>cornerPoints[RIGHTUP].y+EXTRA_SIZE) AND (AIndexY>cornerPoints[RIGHTDOWN].y+EXTRA_SIZE) then aValidPoint:=False;
+
+  if aValidPoint then
+  begin
+    AResult:=fImage[AIndexX, AIndexY];
+  end;
+
+  AValue:=Ord(aResult);
 end;
 
 /// <summary>
@@ -141,13 +165,13 @@ var
   topRight, correctedTopRight, pointA, pointB, pointC, pointD, maybeTopLeft,
     bottomLeft, bottomRight, topLeft, maybeBottomRight, point: IResultPoint;
 
-  cornerPoints: TIResultPointArray;
   bits: TBitMatrix;
   entry: TPair<IResultPoint, Integer>; // TKeyValuePair
   Transitions: TObjectList<TResultPointsAndTransitions>;
   lSideOne, lSideTwo, transBetween, transA, transB: TResultPointsAndTransitions;
   pointCount: TDictionary<IResultPoint, Integer>;
 
+  corners: TIResultPointArray;
 
 
   dimensionTop, dimensionRight, dimension, dimensionCorrected: Integer;
@@ -155,6 +179,10 @@ var
   FContourFinder : TContourFinder;
 
   aList:TList<TPointF>;
+
+  aHoughResult :  THoughResult;
+  aHoughFinal  :  THoughFinal;
+
 begin
   Result := nil;
 
@@ -166,11 +194,7 @@ begin
   if (cornerPoints = nil) then
     exit;
 
-  pointA := cornerPoints[0];
-  pointB := cornerPoints[1];
-  pointC := cornerPoints[2];
-  pointD := cornerPoints[3];
-
+  (*
   aList:=TList<TPointF>.Create;
   FContourFinder := TContourFinder.Create(nil);
   with FContourFinder do
@@ -190,9 +214,62 @@ begin
     Inc(dimensionCorrected);
   end;
   SetLength(corners,dimensionCorrected);
+  *)
+
+  Hough_LineDetection(fImage, aHoughResult);
+  HoughResultToParameterDynamic(aHoughResult, (0 / 100), aHoughFinal);
+
+  corners := TIResultPointArray.Create{$ifndef FPC}(){$endif};
+  SetLength(corners,Length(aHoughFinal));
+  dimensionCorrected:=0;
+  for dimension:=0 to (Length(aHoughFinal)-1) do
+  begin
+    if aHoughFinal[dimension].z<1 then continue;
+    corners[dimensionCorrected]:=TResultPointHelpers.CreateResultPoint(aHoughFinal[dimension].x,aHoughFinal[dimension].y);
+    Inc(dimensionCorrected);
+  end;
+  SetLength(corners,dimensionCorrected);
+  Result := TDetectorResult.Create(nil, corners);
+  exit;
+
+
+  pointA := TResultPointHelpers.CreateResultPoint(fImage.width,0);
+  pointB := TResultPointHelpers.CreateResultPoint(0,0);
+  pointC := TResultPointHelpers.CreateResultPoint(0,fImage.height);
+  pointD := TResultPointHelpers.CreateResultPoint(0,0);
+
+  for dimension:=0 to dimensionCorrected-1 do
+  begin
+    if corners[dimension].x<pointA.x then
+    begin
+      pointA.x:=corners[dimension].x;
+      pointA.y:=corners[dimension].y;
+    end;
+    if corners[dimension].x>pointB.x then
+    begin
+      pointB.x:=corners[dimension].x;
+      pointB.y:=corners[dimension].y;
+    end;
+    if corners[dimension].y<pointC.y then
+    begin
+      pointC.x:=corners[dimension].x;
+      pointC.y:=corners[dimension].y;
+    end;
+    if corners[dimension].y>pointD.y then
+    begin
+      pointD.x:=corners[dimension].x;
+      pointD.y:=corners[dimension].y;
+    end;
+
+  end;
+
+  //cornerPoints:=NIL;
+  //cornerPoints:=centerEdges(pointA,pointB,pointC,pointD);
+
   Result := TDetectorResult.Create(nil, corners);
   FContourFinder.Free;
   aList.Free;
+  //corners:=nil;
   exit;
 
   // Point A and D are across the diagonal from one another,
