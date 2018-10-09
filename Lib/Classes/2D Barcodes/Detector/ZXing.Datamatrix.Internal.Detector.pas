@@ -34,8 +34,6 @@ uses
   ZXing.DefaultGridSampler,
   ZXing.Common.DetectorResult,
   ZXing.ResultPoint,
-  ZXing.Common.GridSampler,
-  ZXing.Common.Detector.MathUtils,
   ZXing.Common.Detector.WhiteRectangleDetector;
 
 type
@@ -45,55 +43,22 @@ type
   /// </summary>
   TDataMatrixDetector = class(TObject)
   private
-  var
     Fimage: TBitMatrix;
     FrectangleDetector: TWhiteRectangleDetector;
-
-  type
-    /// <summary>
-    /// Simply encapsulates two points and a number of transitions between them.
-    /// </summary>
-    TResultPointsAndTransitions = class sealed
-    public
-      From: IResultPoint;
-      To_: IResultPoint;
-      Transitions: Integer;
-
-      constructor Create(From: IResultPoint; To_: IResultPoint;
-        Transitions: Integer);
-      destructor Destroy; override;
-      function ToString: String; override;
-    end;
-
-    /// <summary>
-    /// Orders ResultPointsAndTransitions by number of transitions, ascending.
-    /// </summary>
-    TResultPointsAndTransitionsComparator = class sealed
-      (TComparer<TResultPointsAndTransitions>)
-    public
-      function Compare({$ifdef FPC}constref{$else}const{$endif} o1, o2: TResultPointsAndTransitions)
-        : Integer; override;
-    end;
-
-  var
-    FtransCompare: TResultPointsAndTransitionsComparator;
+    function isValid(p: IResultPoint): Boolean;
+    function correctTopRight(points:TIResultPointArray): IResultPoint;
+    function shiftPoint(point,_to:IResultPoint;_div:integer):IResultPoint;
+    function moveAway(point:IResultPoint;fromX,fromY:double):IResultPoint;
+    function detectSolid1(cornerPoints:TIResultPointArray):TIResultPointArray;
+    function detectSolid2(points:TIResultPointArray):TIResultPointArray;
+    function shiftToModuleCenter(points:TIResultPointArray):TIResultPointArray;
+    function transitionsBetween(Afrom, Ato: IResultPoint): integer;
+    function sampleGrid(image: TBitMatrix; topLeft, bottomLeft, bottomRight,
+      topRight: IResultPoint; dimensionX, dimensionY: Integer): TBitMatrix;
   public
     constructor Create(const image: TBitMatrix);
     destructor Destroy; override;
     function detect: TDetectorResult;
-    function transitionsBetween(Afrom, Ato: IResultPoint)
-      : TResultPointsAndTransitions;
-    function distance(a: IResultPoint; b: IResultPoint): Integer;
-    procedure increment(table: TDictionary<IResultPoint, Integer>;
-      key: IResultPoint);
-    function sampleGrid(image: TBitMatrix; topLeft, bottomLeft, bottomRight,
-      topRight: IResultPoint; dimensionX, dimensionY: Integer): TBitMatrix;
-    function isValid(p: IResultPoint): Boolean;
-    function correctTopRight(bottomLeft, bottomRight, topLeft,
-      topRight: IResultPoint; dimension: Integer): IResultPoint;
-    function correctTopRightRectangular(bottomLeft, bottomRight, topLeft,
-      topRight: IResultPoint; dimensionTop, dimensionRight: Integer)
-      : IResultPoint;
   end;
 
 implementation
@@ -108,15 +73,12 @@ constructor TDataMatrixDetector.Create(const image: TBitMatrix);
 begin
   Self.Fimage := image;
   Self.FrectangleDetector := TWhiteRectangleDetector.New(image);
-  Self.FtransCompare := TResultPointsAndTransitionsComparator.Create;
 end;
 
 destructor TDataMatrixDetector.Destroy;
 begin
   if (FrectangleDetector <> nil) then
     FrectangleDetector.Free;
-
-  FtransCompare.Free;
   inherited;
 end;
 
@@ -126,396 +88,182 @@ end;
 /// <returns><see cref="DetectorResult" />encapsulating results of detecting a Data Matrix Code or null</returns>
 function TDataMatrixDetector.detect(): TDetectorResult;
 var
-  topRight, correctedTopRight, pointA, pointB, pointC, pointD, maybeTopLeft,
-    bottomLeft, bottomRight, topLeft, maybeBottomRight, point: IResultPoint;
-
+  topRight,bottomLeft, bottomRight, topLeft: IResultPoint;
   cornerPoints: TIResultPointArray;
+  points: TIResultPointArray;
   bits: TBitMatrix;
-  entry: TPair<IResultPoint, Integer>; // TKeyValuePair
-  Transitions: TObjectList<TResultPointsAndTransitions>;
-  lSideOne, lSideTwo, transBetween, transA, transB: TResultPointsAndTransitions;
-  pointCount: TDictionary<IResultPoint, Integer>;
-
   corners: TIResultPointArray;
-
-  dimensionTop, dimensionRight, dimension, dimensionCorrected: Integer;
+  dimensionTop, dimensionRight: Integer;
 begin
   Result := nil;
 
-  if (FrectangleDetector = nil) then
-    // can be null, if the image is to small
-    exit;
+  // can be null, if the image is to small
+  if (FrectangleDetector = nil) then exit;
 
-  cornerPoints := FrectangleDetector.detect();
-  if (cornerPoints = nil) then
-    exit;
-
-  pointA := cornerPoints[0];
-  pointB := cornerPoints[1];
-  pointC := cornerPoints[2];
-  pointD := cornerPoints[3];
-
-  // Point A and D are across the diagonal from one another,
-  // as are B and C. Figure out which are the solid black lines
-  // by counting transitions
-  Transitions := TObjectList<TResultPointsAndTransitions>.Create;
-  //Transitions.OwnsObjects := True; // check todo ALF
-  pointCount := TDictionary<IResultPoint, Integer>.Create();
   try
-    Transitions.Add(transitionsBetween(pointA, pointB));
-    Transitions.Add(transitionsBetween(pointA, pointC));
-    Transitions.Add(transitionsBetween(pointB, pointD));
-    Transitions.Add(transitionsBetween(pointC, pointD));
-    Transitions.Sort(FtransCompare);
-
-    // Sort by number of transitions. First two will be the two solid sides; last two
-    // will be the two alternating black/white sides
-    lSideOne := Transitions[0];
-    lSideTwo := Transitions[1];
-
-    // Figure out which point is their intersection by tallying up the number of times we see the
-    // endpoints in the four endpoints. One will show up twice.
-
-    increment(pointCount, lSideOne.From);
-    increment(pointCount, lSideOne.To_);
-    increment(pointCount, lSideTwo.From);
-    increment(pointCount, lSideTwo.To_);
-
-    maybeTopLeft := nil;
-    bottomLeft := nil;
-    maybeBottomRight := nil;
-
-    for entry in pointCount do
-    begin
-      point := entry.key;
-      if (entry.Value = 2) then
-        bottomLeft := point
-        // this is definitely the bottom left, then -- end of two L sides
-      else
-      begin
-        // Otherwise it's either top left or bottom right -- just assign the two arbitrarily now
-        if (maybeTopLeft = nil) then
-          maybeTopLeft := point
-        else
-          maybeBottomRight := point;
-      end;
-    end;
-
-    if ((maybeTopLeft = nil) or (bottomLeft = nil) or (maybeBottomRight = nil))
-    then
+    cornerPoints := FrectangleDetector.detect();
+    if (cornerPoints = nil) then
       exit;
 
-    // Bottom left is correct but top left and bottom right might be switched
-    corners := TIResultPointArray.Create(maybeTopLeft, bottomLeft,
-      maybeBottomRight);
-    // Use the dot product trick to sort them out
-    TResultPointHelpers.orderBestPatterns(corners);
+    points:= detectSolid1(cornerPoints);
+    points:= detectSolid2(points);
 
-    // Now we know which is which:
-    bottomRight := corners[0];
-    bottomLeft := corners[1];
-    topLeft := corners[2];
+    points[3]:=correctTopRight(points);
+    if (points[3] = nil) then exit;
 
-    // Which point didn't we find in relation to the "L" sides? that's the top right corner
-    if (not pointCount.ContainsKey(pointA)) then
-      topRight := pointA
-    else if (not pointCount.ContainsKey(pointB)) then
-      topRight := pointB
-    else if (not pointCount.ContainsKey(pointC)) then
-      topRight := pointC
-    else
-      topRight := pointD;
+    points:=shiftToModuleCenter(points);
 
-    // Next determine the dimension by tracing along the top or right side and counting black/white
-    // transitions. Since we start inside a black module, we should see a number of transitions
-    // equal to 1 less than the code dimension. Well, actually 2 less, because we are going to
-    // end on a black module:
+    topLeft := points[0];
+    bottomLeft := points[1];
+    bottomRight := points[2];
+    topRight := points[3];
 
-    // The top right point is actually the corner of a module, which is one of the two black modules
-    // adjacent to the white module at the top right. Tracing to that corner from either the top left
-    // or bottom right should work here.
-    transBetween := transitionsBetween(topLeft, topRight);
-    dimensionTop := transBetween.Transitions;
-    transBetween.Free;
+    dimensionTop := transitionsBetween(topLeft, topRight) + 1;
+    dimensionRight := transitionsBetween(bottomRight, topRight) + 1;
 
-    transBetween := transitionsBetween(bottomRight, topRight);
-    dimensionRight := transBetween.Transitions;
-    transBetween.Free;
+    if ((dimensionTop AND $01) = 1) then Inc(dimensionTop);
+    if ((dimensionRight AND $01) = 1) then Inc(dimensionRight);
 
-    if ((dimensionTop and $01) = 1) then
-      // it can't be odd, so, round... up?
-      Inc(dimensionTop);
-    Inc(dimensionTop, 2);
-
-    if ((dimensionRight and $01) = 1) then
-      // it can't be odd, so, round... up?
-      Inc(dimensionRight);
-    Inc(dimensionRight, 2);
-
-    // Rectangular symbols are 6x16, 6x28, 10x24, 10x32, 14x32, or 14x44. If one dimension is more
-    // than twice the other, it's certainly rectangular, but to cut a bit more slack we accept it as
-    // rectangular if the bigger side is at least 7/4 times the other:
-    if (((4 * dimensionTop) >= (7 * dimensionRight)) or
-      ((4 * dimensionRight) >= (7 * dimensionTop))) then
+    if ((4*dimensionTop < 7*dimensionRight) AND (4*dimensionRight < 7*dimensionTop)) then
     begin
-      // The matrix is rectangular
-      correctedTopRight := correctTopRightRectangular(bottomLeft, bottomRight,
-        topLeft, topRight, dimensionTop, dimensionRight);
-      if (correctedTopRight = nil) then
-        correctedTopRight := topRight;
-
-      transBetween := transitionsBetween(topLeft, correctedTopRight);
-      dimensionTop := transBetween.Transitions;
-      transBetween.Free;
-
-      transBetween := transitionsBetween(bottomRight, correctedTopRight);
-      dimensionRight := transBetween.Transitions;
-      transBetween.Free;
-
-      if ((dimensionTop and $01) = 1) then
-        // it can't be odd, so, round... up?
-        Inc(dimensionTop);
-
-      if ((dimensionRight and $01) = 1) then
-        // it can't be odd, so, round... up?
-        Inc(dimensionRight);
-
-      bits := sampleGrid(Fimage, topLeft, bottomLeft, bottomRight,
-        correctedTopRight, dimensionTop, dimensionRight)
-    end
-    else
-    begin
-      // The matrix is square
-      dimension := Math.Min(dimensionRight, dimensionTop);
-      // correct top right point to match the white module
-      correctedTopRight := correctTopRight(bottomLeft, bottomRight, topLeft,
-        topRight, dimension);
-      if (correctedTopRight = nil) then
-        correctedTopRight := topRight;
-
-      // Redetermine the dimension using the corrected top right point
-      transA := transitionsBetween(topLeft, correctedTopRight);
-      transB := transitionsBetween(bottomRight, correctedTopRight);
-      dimensionCorrected :=
-        (Math.Max(transA.Transitions, transB.Transitions) + 1);
-
-      transA.Free;
-      transB.Free;
-
-      if ((dimensionCorrected and $01) = 1) then
-        Inc(dimensionCorrected);
-
-      bits := sampleGrid(Fimage, topLeft, bottomLeft, bottomRight,
-        correctedTopRight, dimensionCorrected, dimensionCorrected);
+      dimensionTop   := max(dimensionTop, dimensionRight);
+      dimensionRight := dimensionTop;
     end;
 
-    corners:=nil;
+    bits := sampleGrid(Fimage,
+                       topLeft, bottomLeft, bottomRight,topRight,
+                       dimensionTop, dimensionRight);
 
-    {$ifndef Debug}
-    if (bits = nil) then
-      exit;
-    {$endif}
-
-    corners := TIResultPointArray.Create(topLeft,
-      bottomLeft, bottomRight, correctedTopRight);
+    corners := TIResultPointArray.Create(topLeft, bottomLeft, bottomRight, topRight);
 
     Result := TDetectorResult.Create(bits, corners);
 
   finally
-    pointCount.Free;
-    Transitions.Free;
     cornerPoints := nil;
   end;
 end;
 
 /// <summary>
 /// Calculates the position of the white top right module using the output of the rectangle detector
-/// for a rectangular matrix
+/// for a square matrix
 /// </summary>
-function TDataMatrixDetector.correctTopRightRectangular(bottomLeft, bottomRight,
-  topLeft, topRight: IResultPoint; dimensionTop, dimensionRight: Integer)
-  : IResultPoint;
+function TDataMatrixDetector.correctTopRight(points:TIResultPointArray): IResultPoint;
 var
-  corr, norm, cos, sin: Single;
-  c1, c2: IResultPoint;
-  l1, l2: Integer;
-  transA, transB: TResultPointsAndTransitions;
+  pointA, pointB, pointC, pointD : IResultPoint;
+  pointAs, pointCs               : IResultPoint;
+  candidate1, candidate2         : IResultPoint;
+  trTop,trRight                  : integer;
+  sumc1,sumc2                    : integer;
 begin
-  corr := (distance(bottomLeft, bottomRight) / (2 * dimensionTop));
-  norm := distance(topLeft, topRight);
-  if (norm = 0) then
-  begin
-    Result := nil;
-    exit
-  end;
-  cos := ((topRight.X - topLeft.X) / norm);
-  sin := ((topRight.Y - topLeft.Y) / norm);
+  // A..D
+  // |  :
+  // B--C
+  pointA := points[0];
+  pointB := points[1];
+  pointC := points[2];
+  pointD := points[3];
 
-  c1 := TResultPointHelpers.CreateResultPoint((topRight.X + (corr * cos)),
-    (topRight.Y + (corr * sin)));
+  // shift points for safe transition detection.
+  trTop := transitionsBetween(pointA, pointD);
+  trRight := transitionsBetween(pointB, pointD);
+  pointAs := shiftPoint(pointA, pointB, (trRight + 1) * 4);
+  pointCs := shiftPoint(pointC, pointB, (trTop + 1) * 4);
 
-  corr := (distance(bottomLeft, topLeft) / (2 * dimensionRight));
-  norm := distance(bottomRight, topRight);
-  if (norm = 0) then
-  begin
-    Result := nil;
-    exit;
-  end;
-  cos := ((topRight.X - bottomRight.X) / norm);
-  sin := ((topRight.Y - bottomRight.Y) / norm);
+  trTop := transitionsBetween(pointAs, pointD);
+  trRight := transitionsBetween(pointCs, pointD);
 
-  c2 := TResultPointHelpers.CreateResultPoint((topRight.X + (corr * cos)),
-    (topRight.Y + (corr * sin)));
-  if (not isValid(c1)) then
+  candidate1 := TResultPointHelpers.CreateResultPoint(
+    pointD.X + (pointC.X - pointB.X) / (trTop + 1),
+    pointD.Y + (pointC.Y - pointB.Y) / (trTop + 1));
+
+  candidate2 := TResultPointHelpers.CreateResultPoint(
+    pointD.X + (pointA.X - pointB.X) / (trRight + 1),
+    pointD.Y + (pointA.Y - pointB.Y) / (trRight + 1));
+
+  if (NOT isValid(candidate1)) then
   begin
-    if (isValid(c2)) then
+    if (isValid(candidate2)) then
     begin
-      Result := c2;
-      exit;
+      result:=candidate2;
+      exit
     end;
-
-    Result := nil;
+    result:=nil;
     exit;
   end;
-  if (not isValid(c2)) then
+  if (NOT isValid(candidate2)) then
   begin
-    Result := c1;
+    result:=candidate1;
     exit;
   end;
 
-  transA := transitionsBetween(topLeft, c1);
-  transB := transitionsBetween(bottomRight, c1);
-  l1 := (Abs((dimensionTop - transA.Transitions)) +
-    Abs((dimensionRight - transB.Transitions)));
-  transA.Free;
-  transB.Free;
+  sumc1 := transitionsBetween(pointAs, candidate1) + transitionsBetween(pointCs, candidate1);
+  sumc2 := transitionsBetween(pointAs, candidate2) + transitionsBetween(pointCs, candidate2);
 
-  transA := transitionsBetween(topLeft, c2);
-  transB := transitionsBetween(bottomRight, c2);
-  l2 := (Abs((dimensionTop - transA.Transitions)) +
-    Abs((dimensionRight - transB.Transitions)));
-  transA.Free;
-  transB.Free;
-
-  if (l1 <= l2) then
-  begin
-    Result := c1;
-  end
+  if (sumc1 > sumc2) then
+    result:=candidate1
   else
-  begin
-    Result := c2;
-  end;
+    result:=candidate2;
 
 end;
 
-/// <summary>
-/// Calculates the position of the white top right module using the output of the rectangle detector
-/// for a square matrix
-/// </summary>
-function TDataMatrixDetector.correctTopRight(bottomLeft, bottomRight, topLeft,
-  topRight: IResultPoint; dimension: Integer): IResultPoint;
+function TDataMatrixDetector.shiftToModuleCenter(points:TIResultPointArray):TIResultPointArray;
 var
-  corr, cos, sin: Single;
-  norm: Integer;
-  c1, c2: IResultPoint;
-  l1, l2: Integer;
-  transA, transB: TResultPointsAndTransitions;
+  pointA, pointB, pointC, pointD     : IResultPoint;
+  pointAs, pointBs, pointCs, pointDs : IResultPoint;
+  dimH, dimV                         : integer;
+  centerX, centerY                   : double;
 begin
-  corr := (distance(bottomLeft, bottomRight) / (2 * dimension));
-  norm := distance(topLeft, topRight);
-  if (norm = 0) then
-  begin
-    Result := nil;
-    exit;
-  end;
-  cos := ((topRight.X - topLeft.X) / norm);
-  sin := ((topRight.Y - topLeft.Y) / norm);
+  // A..D
+  // |  :
+  // B--C
+  pointA := points[0];
+  pointB := points[1];
+  pointC := points[2];
+  pointD := points[3];
 
-  c1 := TResultPointHelpers.CreateResultPoint((topRight.X + (corr * cos)),
-    (topRight.Y + (corr * sin)));
+  // calculate pseudo dimensions
+  dimH := transitionsBetween(pointA, pointD) + 1;
+  dimV := transitionsBetween(pointC, pointD) + 1;
 
-  corr := (distance(bottomLeft, topLeft) / (2 * dimension));
-  norm := distance(bottomRight, topRight);
-  if (norm = 0) then
-  begin
-    Result := nil;
-    exit;
-  end;
-  cos := ((topRight.X - bottomRight.X) / norm);
-  sin := ((topRight.Y - bottomRight.Y) / norm);
+  // shift points for safe dimension detection
+  pointAs := shiftPoint(pointA, pointB, dimV * 4);
+  pointCs := shiftPoint(pointC, pointB, dimH * 4);
 
-  c2 := TResultPointHelpers.CreateResultPoint((topRight.X + (corr * cos)),
-    (topRight.Y + (corr * sin)));
+  //  calculate more precise dimensions
+  dimH := transitionsBetween(pointAs, pointD) + 1;
+  dimV := transitionsBetween(pointCs, pointD) + 1;
+  if ((dimH AND $01) = 1) then
+    Inc(dimH);
+  if ((dimV AND $01) = 1) then
+    Inc(dimV);
 
-  if (not isValid(c1)) then
-  begin
-    if (isValid(c2)) then
-    begin
-      Result := c2;
-      exit;
-    end;
+  // WhiteRectangleDetector returns points inside of the rectangle.
+  // I want points on the edges.
+  centerX := (pointA.X + pointB.X + pointC.X + pointD.X) / 4;
+  centerY := (pointA.Y + pointB.Y + pointC.Y + pointD.Y) / 4;
+  pointA := moveAway(pointA, centerX, centerY);
+  pointB := moveAway(pointB, centerX, centerY);
+  pointC := moveAway(pointC, centerX, centerY);
+  pointD := moveAway(pointD, centerX, centerY);
 
-    Result := nil;
-    exit;
-  end;
 
-  if (not isValid(c2)) then
-  begin
-    Result := c1;
-    exit;
-  end;
+  // shift points to the center of each modules
+  pointAs := shiftPoint(pointA, pointB, dimV * 4);
+  pointAs := shiftPoint(pointAs, pointD, dimH * 4);
+  pointBs := shiftPoint(pointB, pointA, dimV * 4);
+  pointBs := shiftPoint(pointBs, pointC, dimH * 4);
+  pointCs := shiftPoint(pointC, pointD, dimV * 4);
+  pointCs := shiftPoint(pointCs, pointB, dimH * 4);
+  pointDs := shiftPoint(pointD, pointC, dimV * 4);
+  pointDs := shiftPoint(pointDs, pointA, dimH * 4);
 
-  transA := transitionsBetween(topLeft, c1);
-  transB := transitionsBetween(bottomRight, c1);
-  l1 := (Abs(transA.Transitions - transB.Transitions));
-  transA.Free;
-  transB.Free;
-
-  transA := transitionsBetween(topLeft, c2);
-  transB := transitionsBetween(bottomRight, c2);
-  l2 := (Abs(transA.Transitions - transB.Transitions));
-  transA.Free;
-  transB.Free;
-
-  if (l1 <= l2) then
-  begin
-    Result := c1;
-  end
-  else
-  begin
-    Result := c2;
-  end;
-
+  result:=TIResultPointArray.Create(pointAs, pointBs, pointCs, pointDs);
 end;
 
 function TDataMatrixDetector.isValid(p: IResultPoint): Boolean;
 begin
   Result := ((((p.X >= 0) and (p.X < Fimage.Width)) and (p.Y > 0)) and
     (p.Y < Fimage.Height))
-end;
-
-// L2 distance
-function TDataMatrixDetector.distance(a: IResultPoint; b: IResultPoint)
-  : Integer;
-begin
-  Result := TMathUtils.round(TResultPointHelpers.distance(a, b))
-end;
-
-/// <summary>
-/// Increments the Integer associated with a key by one.
-/// </summary>
-procedure TDataMatrixDetector.increment
-  (table: TDictionary<IResultPoint, Integer>; key: IResultPoint);
-var
-  Value: Integer;
-begin
-  if (table.ContainsKey(key)) then
-  begin
-    Value := table[key];
-    table[key] := (Value + 1);
-  end
-  else
-    table.Add(key, 1); // table[key] := 1;
 end;
 
 function TDataMatrixDetector.sampleGrid(image: TBitMatrix;
@@ -533,7 +281,7 @@ end;
 /// Counts the number of black/white transitions between two points, using something like Bresenham's algorithm.
 /// </summary>
 function TDataMatrixDetector.transitionsBetween(Afrom, Ato: IResultPoint)
-  : TResultPointsAndTransitions;
+  : integer;
 var
   temp, fromX, fromY, toX, toY: Integer;
   steep: Boolean;
@@ -561,8 +309,7 @@ begin
 
   dx := Abs(toX - fromX);
   dy := Abs(toY - fromY);
-  //error := TMathUtils.Asr(-dx, 1);
-  error := -1*dx;
+  error := (-1*dx DIV 2);
   if (fromY < toY) then
     ystep := 1
   else
@@ -576,9 +323,10 @@ begin
     inBlack := Fimage[fromY, fromX]
   else
     inBlack := Fimage[fromX, fromY];
-  isBlack := inBlack;
+
   X := fromX;
   Y := fromY;
+
   while ((X <> toX)) do
   begin
     if steep then
@@ -602,40 +350,134 @@ begin
     Inc(X, xstep)
   end;
 
-  Result := TResultPointsAndTransitions.Create(Afrom, Ato, Transitions);
+  Result := Transitions;
 end;
 
-{ TResultPointsAndTransitions }
-
-constructor TDataMatrixDetector.TResultPointsAndTransitions.Create
-  (From: IResultPoint; To_: IResultPoint; Transitions: Integer);
+function TDataMatrixDetector.detectSolid1(cornerPoints:TIResultPointArray):TIResultPointArray;
+var
+  pointA, pointB, pointC, pointD : IResultPoint;
+  trAB,trBC,trCD,trDA            : integer;
+  min                            : integer;
+  points                         : TIResultPointArray;
 begin
-  Self.From := From;
-  Self.To_ := To_;
-  Self.Transitions := Transitions;
+  // 0  2
+  // 1  3
+  pointA := cornerPoints[0];
+  pointB := cornerPoints[1];
+  pointC := cornerPoints[3];
+  pointD := cornerPoints[2];
+
+  trAB := transitionsBetween(pointA, pointB);
+  trBC := transitionsBetween(pointB, pointC);
+  trCD := transitionsBetween(pointC, pointD);
+  trDA := transitionsBetween(pointD, pointA);
+
+  // 0..3
+  // :  :
+  // 1--2
+  min := trAB;
+
+  points := TIResultPointArray.Create(pointD, pointA, pointB, pointC);
+
+  if (min > trBC) then
+  begin
+    min := trBC;
+    points[0] := pointA;
+    points[1] := pointB;
+    points[2] := pointC;
+    points[3] := pointD;
+  end;
+  if (min > trCD) then
+  begin
+    min := trCD;
+    points[0] := pointB;
+    points[1] := pointC;
+    points[2] := pointD;
+    points[3] := pointA;
+  end;
+  if (min > trDA) then
+  begin
+    points[0] := pointC;
+    points[1] := pointD;
+    points[2] := pointA;
+    points[3] := pointB;
+  end;
+
+  result:=points;
 end;
 
-destructor TDataMatrixDetector.TResultPointsAndTransitions.Destroy;
+function TDataMatrixDetector.detectSolid2(points:TIResultPointArray):TIResultPointArray;
+var
+  pointA, pointB, pointC, pointD : IResultPoint;
+  pointBs, pointCs               : IResultPoint;
+  tr,trBA,trCD                   : integer;
 begin
+  // A..D
+  // :  :
+  // B--C
+  pointA := points[0];
+  pointB := points[1];
+  pointC := points[2];
+  pointD := points[3];
 
-  // if (Assigned(Self.From)) then
-  // FreeAndNil(Self.From);
-  //
-  // if (Assigned(Self.To_)) then
-  // FreeAndNil(Self.To_);
+  // Transition detection on the edge is not stable.
+  // To safely detect, shift the points to the module center.
+  tr := transitionsBetween(pointA, pointD);
+  pointBs := shiftPoint(pointB, pointC, (tr + 1) * 4);
+  pointCs := shiftPoint(pointC, pointB, (tr + 1) * 4);
+  trBA := transitionsBetween(pointBs, pointA);
+  trCD := transitionsBetween(pointCs, pointD);
 
-  inherited;
+  // 0..3
+  // |  :
+  // 1--2
+  if (trBA < trCD) then
+  begin
+    // solid sides: A-B-C
+    points[0] := pointA;
+    points[1] := pointB;
+    points[2] := pointC;
+    points[3] := pointD;
+  end
+  else
+  begin
+    // solid sides: B-C-D
+    points[0] := pointB;
+    points[1] := pointC;
+    points[2] := pointD;
+    points[3] := pointA;
+  end;
+
+  result:=points;
 end;
 
-function TDataMatrixDetector.TResultPointsAndTransitions.ToString: string;
+function TDataMatrixDetector.shiftPoint(point,_to:IResultPoint;_div:integer):IResultPoint;
+var
+  x,y:double;
 begin
-  Result := From.ToString + '/' + To_.ToString + '/' + IntToStr(Transitions);
+  x := (_to.X - point.X) / (_div + 1);
+  y := (_to.Y - point.Y) / (_div + 1);
+  result:=TResultPointHelpers.CreateResultPoint(point.X + x, point.Y + y);
 end;
 
-function TDataMatrixDetector.TResultPointsAndTransitionsComparator.Compare
-  ({$ifdef FPC}constref{$else}const{$endif} o1, o2: TResultPointsAndTransitions): Integer;
+function TDataMatrixDetector.moveAway(point:IResultPoint;fromX,fromY:double):IResultPoint;
+var
+  x,y:double;
 begin
-  Result := (o1.Transitions - o2.Transitions);
+  x := point.X;
+  y := point.Y;
+
+  if (x < fromX) then
+    x:=x-1
+  else
+    x:=x+1;
+
+  if (y < fromY) then
+    y:=y-1
+  else
+    y:=y+1;
+
+  result:=TResultPointHelpers.CreateResultPoint(x,y);
 end;
 
 end.
