@@ -197,11 +197,11 @@ var
   offset : Integer;
   r, g, b : byte;
   {$ifdef FPC}
-  dx, dy : Integer;
   PixelColor:TFPColor;
-  scanLine: PColorRGBA;
+  scanLine: PByte;
   Raw: TRawImage;
   lazBmp : TLazIntfImage;
+  bytesPerPixel, redOffset, greenOffset, blueOffset: byte;
   {$else}
   P: pRGBTripleArray;
   {$endif}
@@ -212,17 +212,17 @@ begin
   Raw := sourceBitmap.RawImage;
   with Raw.Description do
   begin
-    dx := (BitsPerPixel DIV 8);
+    bytesPerPixel := BitsPerPixel div 8;
+    redOffset := RedShift div 8;
+    greenOffset := GreenShift div 8;
+    blueOffset := BlueShift div 8;
+    {$IFNDEF ENDIAN_LITTLE}
+    redOffset := bytesPerPixel - 1 - redOffset;
+    greenOffset := bytesPerPixel - 1 - greenOffset;
+    blueOffset := bytesPerPixel - 1 - blueOffset;
+    {$ENDIF}
   end;
 
-  if (Raw.Description.ByteOrder = riboLSBFirst) and (Raw.Description.BlueShift =0 ) then
-  begin
-    // format will be BGR
-  end
-  else
-  begin
-    // format will be RGB
-  end;
   //if sourceBitmap.PixelFormat=pf32bit then
   lazBmp:=nil;
   if Raw.Description.BitsPerPixel<8 then
@@ -234,8 +234,7 @@ begin
   for y := 0 to sourceBitmap.Height - 1 do
   begin
     offset := y * FWidth;
-    //offset := y * sourceBitmap.Width;
-    scanLine := PColorRGBA(sourceBitmap.ScanLine[y]);
+    scanLine:=Raw.GetLineStart(y);
     for x := 0 to sourceBitmap.Width - 1 do
     begin
       // Slow !!!
@@ -250,10 +249,10 @@ begin
       end
       else
       begin
-        r:=scanLine^.R;
-        g:=scanLine^.G;
-        b:=scanLine^.B;
-        Inc(PByte(scanLine),dx);
+        r:=(scanLine+redOffset)^;
+        g:=(scanLine+greenOffset)^;
+        b:=(scanLine+blueOffset)^;
+        Inc(scanLine,bytesPerPixel);
       end;
       luminances[offset + x] := (TMathUtils.Asr(3482*r + 11721*g + 1181*b, 14) AND $FF);
       //luminances[offset + x] := (TMathUtils.Asr(RChannelWeight*r + GChannelWeight*g + BChannelWeight*b,ChannelWeight) AND $FF);
