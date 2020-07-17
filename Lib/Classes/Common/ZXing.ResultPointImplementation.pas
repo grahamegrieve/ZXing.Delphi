@@ -24,6 +24,7 @@ type
     Fx, Fy: Single;
     bytesX, bytesY: TSingleArray;
     FToString: String;
+  protected
     procedure SetX(const AValue: Single);
     procedure SetY(const AValue: Single);
     function GetX: Single;

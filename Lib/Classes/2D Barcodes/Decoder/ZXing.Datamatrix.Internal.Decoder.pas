@@ -28,7 +28,7 @@ interface
 uses
   SysUtils,
   Generics.Collections,
-  ZXing.DecodeHintType,
+  //ZXing.DecodeHintType,
   ZXing.Common.BitMatrix,
   ZXing.Datamatrix.Internal.BitMatrixParser,
   ZXing.Datamatrix.Internal.DataBlock,

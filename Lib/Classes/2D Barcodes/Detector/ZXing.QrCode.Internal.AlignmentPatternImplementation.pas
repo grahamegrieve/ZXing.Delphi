@@ -27,9 +27,7 @@ unit ZXing.QrCode.Internal.AlignmentPatternImplementation;
 interface
 
 uses
-  ZXing.QrCode.Internal.AlignmentPattern,
-  ZXing.ResultPoint,
-  ZXing.ResultPointImplementation;
+  ZXing.QrCode.Internal.AlignmentPattern;
 
 // this is the function that actually creates IAlignmentPattern instances.
 // the actual implementation of the interface is totally hidden to all other units,
@@ -39,8 +37,11 @@ function NewAlignmentPattern(const posX, posY, estimatedModuleSize: Single):IAli
 
 implementation
 
-{ TAlignmentPattern }
+uses
+  ZXing.ResultPoint,
+  ZXing.ResultPointImplementation;
 
+{ TAlignmentPattern }
 
 type
   /// <summary> <p>Encapsulates an alignment pattern, which are the smaller square patterns found in
@@ -50,7 +51,6 @@ type
   TAlignmentPattern = class sealed(TResultPoint,IResultPoint,IAlignmentPattern)
   private
     estimatedModuleSize: Single;
-    constructor Create(const posX, posY, estimatedModuleSize: Single);
 
     /// <summary> <p>Determines if this alignment pattern "about equals" an alignment pattern at the stated
     /// position and size -- meaning, it is at nearly the same center with nearly the same size.</p>
@@ -67,6 +67,9 @@ type
     /// <returns></returns>
     function combineEstimate(const i, j,
       newModuleSize: Single): IAlignmentPattern;
+
+  public
+    constructor Create(const posX, posY, estimatedModuleSize: Single);
   end;
 
 

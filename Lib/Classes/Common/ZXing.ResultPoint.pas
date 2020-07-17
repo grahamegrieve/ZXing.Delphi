@@ -124,7 +124,8 @@ type
 
 implementation
 
-uses ZXing.ResultPointImplementation;
+uses
+  ZXing.ResultPointImplementation;
 
 class function TResultPointHelpers.CreateResultPoint:IResultPoint;
 begin

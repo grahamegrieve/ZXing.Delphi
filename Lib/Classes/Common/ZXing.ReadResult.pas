@@ -184,7 +184,7 @@ type
     FValue: Integer;
     function Value: Integer;
   private
-    constructor Create(const AValue: Integer);
+    {%H-}constructor Create(const AValue: Integer);
   end;
 
 function TIntegerMetadata.Value: Integer;
@@ -206,7 +206,7 @@ type
     FValue: IByteSegments;
     function Value: IByteSegments;
   private
-    constructor Create(const AValue: IByteSegments);
+    {%H-}constructor Create(const AValue: IByteSegments);
   end;
 
 function TByteSegmentsMetadata.Value: IByteSegments;

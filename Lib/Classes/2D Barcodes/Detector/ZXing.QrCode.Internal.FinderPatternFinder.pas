@@ -835,7 +835,7 @@ end;
 
 function TFinderPatternFinder.selectBestPatterns: TIFinderPatternArray;
 var
-  totalModuleSize, average, size, stdDev, square, limit: Single;
+  totalModuleSize, average, size, stdDev, square, limit, avrsng: Single;
   center, possibleCenter, pattern: IFinderPattern;
   startSize, i: Integer;
   comparator: IComparer<IFinderPattern>;
@@ -866,9 +866,10 @@ begin
     // in TFurthestFromAverageComparator put a breakpoint in it and see
     // that the destructor never gets called if  you don't use this intermediate
     // assignment)
-    comparator :=  TFurthestFromAverageComparator.Create(average);
+    avrsng := average;
+    comparator :=  TFurthestFromAverageComparator.Create(avrsng);
     FPossibleCenters.Sort(comparator);
-    limit := Math.Max((0.2 * average), stdDev);
+    limit := Math.Max((0.2 * avrsng), stdDev);
     i := 0;
     while (((i < FPossibleCenters.Count) and
       (FPossibleCenters.Count > 3))) do

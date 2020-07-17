@@ -27,9 +27,9 @@ interface
 
 uses
   SysUtils,
-  ZXing.Common.BitMatrix,
-  ZXing.QrCode.Internal.FormatInformation,
-  ZXing.Common.Detector.MathUtils;
+  //ZXing.Common.BitMatrix,
+  //ZXing.Common.Detector.MathUtils,
+  ZXing.QrCode.Internal.FormatInformation;
 
 type
   /// <summary>
@@ -89,10 +89,10 @@ type
     class procedure ClassFinal; static;
     class function GetBuildVersions: TArray<TVersion>; static;
 
-    constructor Create(versionNumber, symbolSizeRows, symbolSizeColumns,
-      dataRegionSizeRows, dataRegionSizeColumns: Integer; ecBlocks: TECBlocks);
 
   public
+    constructor Create(versionNumber, symbolSizeRows, symbolSizeColumns,
+      dataRegionSizeRows, dataRegionSizeColumns: Integer; ecBlocks: TECBlocks);
     destructor Destroy; override;
     function ToString: string; override;
     class function getVersionForDimensions(numRows: Integer;

@@ -27,10 +27,10 @@ interface
 
 uses
   SysUtils,
+  //Math,
   Generics.Collections,
   ZXing.Common.Detector.MathUtils,
-  Math,
-  ZXing.Common.BitArray,
+  //ZXing.Common.BitArray,
   ZXing.BarCodeFormat,
   ZXing.ReadResult,
   ZXing.Reader,
@@ -64,7 +64,7 @@ type
     class function extractPureBits(const image: TBitMatrix): TBitMatrix; static;
 
     class function moduleSize(const leftTopBlack: TArray<Integer>;
-      const image: TBitMatrix; var moduleSize: Integer): Boolean; static;
+      const image: TBitMatrix; out moduleSize: Integer): Boolean; static;
   public
     constructor Create;
     destructor Destroy; override;
@@ -246,7 +246,7 @@ begin
 end;
 
 class function TDataMatrixReader.moduleSize(const leftTopBlack: TArray<Integer>;
-  const image: TBitMatrix; var moduleSize: Integer): Boolean;
+  const image: TBitMatrix; out moduleSize: Integer): Boolean;
 var
   width, x, y: Integer;
 begin

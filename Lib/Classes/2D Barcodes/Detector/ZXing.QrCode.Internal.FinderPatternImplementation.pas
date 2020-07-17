@@ -17,9 +17,14 @@
   * Delphi Implementation by E. Spelt and K. Gossens
 }
 
+{$IFDEF FPC}
+  {$mode delphi}{$H+}
+{$ENDIF}
+
 unit ZXing.QrCode.Internal.FinderPatternImplementation;
 
 interface
+
 uses
   ZXing.QrCode.Internal.FinderPattern;
 
@@ -27,12 +32,13 @@ uses
 function NewFinderPattern(const posX, posY, estimatedModuleSize: Single; const count: Integer):IFinderPattern; overload;
 function NewFinderPattern(const posX, posY, estimatedModuleSize: Single):IFinderPattern; overload;
 
-
 implementation
-uses ZXing.ResultPoint,ZXing.ResultPointImplementation;
+
+uses
+  ZXing.ResultPoint,
+  ZXing.ResultPointImplementation;
 
 { TFinderPattern }
-
 
 type
   /// <summary>
@@ -47,10 +53,6 @@ type
 
     function GetCount:integer;
     procedure SetCount(value:integer);
-
-    constructor Create(const posX, posY, estimatedModuleSize: Single;
-      const count: Integer); overload;
-    constructor Create(const posX, posY, estimatedModuleSize: Single); overload;
 
     /// <summary> <p>Determines if this finder pattern "about equals" a finder pattern at the stated
     /// position and size -- meaning, it is at nearly the same center with nearly the same size.</p>
@@ -76,6 +78,9 @@ type
     /// </value>
     function estimatedModuleSize : Single;
     property count : Integer read GetCount write SetCount;
+  public
+    constructor Create(const posX, posY, estimatedModuleSize: Single; const count: Integer); overload;
+    constructor Create(const posX, posY, estimatedModuleSize: Single); overload;
   end;
 
 

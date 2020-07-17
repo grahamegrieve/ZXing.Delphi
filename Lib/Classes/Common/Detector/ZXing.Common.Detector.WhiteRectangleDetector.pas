@@ -45,9 +45,6 @@ type
     rightInit: Integer;
     upInit: Integer;
     width: Integer;
-    constructor Create(image: TBitMatrix); overload;
-    constructor Create(image: TBitMatrix; initSize: Integer; x: Integer;
-      y: Integer); overload;
     function centerEdges(y: IResultPoint; z: IResultPoint; x: IResultPoint;
       t: IResultPoint): TIResultPointArray;
     function containsBlackPoint(a: Integer; b: Integer; fixed: Integer;
@@ -55,6 +52,9 @@ type
     function getBlackPointOnSegment(aX: Single; aY: Single; bX: Single;
       bY: Single): IResultPoint;
   public
+    constructor Create(image: TBitMatrix); overload;
+    constructor Create(image: TBitMatrix; initSize: Integer; x: Integer;
+      y: Integer); overload;
     class function New(image: TBitMatrix): TWhiteRectangleDetector; overload;
     class function New(image: TBitMatrix; initSize: Integer; x: Integer;
       y: Integer): TWhiteRectangleDetector; overload; static;

@@ -21,7 +21,7 @@ uses
   {$endif}
   ZXing.LuminanceSource,
   ZXing.RGBLuminanceSource,
-  ZXing.InvertedLuminanceSource,
+  //ZXing.InvertedLuminanceSource,
   ZXing.HybridBinarizer,
   ZXing.BinaryBitmap,
   ZXing.MultiFormatReader,

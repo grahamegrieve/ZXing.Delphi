@@ -28,10 +28,10 @@ interface
 uses
   SysUtils,
   Generics.Collections,
-  ZXing.DecodeHintType,
+  //ZXing.DecodeHintType,
+  //ZXing.Common.Detector.MathUtils,
   ZXing.Common.BitMatrix,
   ZXing.QrCode.Internal.FormatInformation,
-  ZXing.Common.Detector.MathUtils,
   ZXing.Datamatrix.Internal.Version;
 
 type

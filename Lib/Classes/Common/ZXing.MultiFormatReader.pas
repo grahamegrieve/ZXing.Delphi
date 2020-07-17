@@ -28,9 +28,11 @@ interface
 
 uses
   SysUtils,
-  Rtti,
   Generics.Collections,
-  {$ifndef FPC}System.RegularExpressions,{$endif}
+  {$ifndef FPC}
+  //Rtti,
+  System.RegularExpressions,
+  {$endif}
   ZXing.ReadResult,
   ZXing.Reader,
   ZXing.DecodeHintType,
