@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="5">
+    <PathDelim Value="\"/>
+    <Name Value="ZXing"/>
+    <Type Value="RunAndDesignTime"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <OtherUnitFiles Value="..\..\Lib\Classes;..\..\Lib\Classes\1D Barcodes;..\..\Lib\Classes\Common;..\..\Lib\Classes\Common\ReedSolomon;..\..\Lib\Classes\Common\Detector;..\..\Lib\Classes\Filtering;..\..\Lib\Classes\2D Barcodes;..\..\Lib\Classes\2D Barcodes\Decoder;..\..\Lib\Classes\2D Barcodes\Detector"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)\"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Files>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\ZXing.ScanManager.pas"/>
+        <UnitName Value="ZXing.ScanManager"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.Code39Reader.pas"/>
+        <UnitName Value="ZXing.OneD.Code39Reader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.Code93Reader.pas"/>
+        <UnitName Value="ZXing.OneD.Code93Reader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.Code128Reader.pas"/>
+        <UnitName Value="ZXing.OneD.Code128Reader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.EAN8Reader.pas"/>
+        <UnitName Value="ZXing.OneD.EAN8Reader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.EAN13Reader.pas"/>
+        <UnitName Value="ZXing.OneD.EAN13Reader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.EANManufacturerOrgSupport.pas"/>
+        <UnitName Value="ZXing.OneD.EANManufacturerOrgSupport"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.ITFReader.pas"/>
+        <UnitName Value="ZXing.OneD.ITFReader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.OneDReader.pas"/>
+        <UnitName Value="ZXing.OneD.OneDReader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.UPCAReader.pas"/>
+        <UnitName Value="ZXing.OneD.UPCAReader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.UPCEANExtension2Support.pas"/>
+        <UnitName Value="ZXing.OneD.UPCEANExtension2Support"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.UPCEANExtension5Support.pas"/>
+        <UnitName Value="ZXing.OneD.UPCEANExtension5Support"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.UPCEANExtensionSupport.pas"/>
+        <UnitName Value="ZXing.OneD.UPCEANExtensionSupport"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.UPCEANReader.pas"/>
+        <UnitName Value="ZXing.OneD.UPCEANReader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\1D Barcodes\ZXing.OneD.UPCEReader.pas"/>
+        <UnitName Value="ZXing.OneD.UPCEReader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.BarCodeFormat.pas"/>
+        <UnitName Value="ZXing.BarCodeFormat"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.BitSource.pas"/>
+        <UnitName Value="ZXing.BitSource"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.ByteSegments.pas"/>
+        <UnitName Value="ZXing.ByteSegments"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.CharacterSetECI.pas"/>
+        <UnitName Value="ZXing.CharacterSetECI"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.Common.BitArray.pas"/>
+        <UnitName Value="ZXing.Common.BitArray"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.Common.BitArrayImplementation.pas"/>
+        <UnitName Value="ZXing.Common.BitArrayImplementation"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.Common.BitMatrix.pas"/>
+        <UnitName Value="ZXing.Common.BitMatrix"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.Common.DetectorResult.pas"/>
+        <UnitName Value="ZXing.Common.DetectorResult"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.Common.GridSampler.pas"/>
+        <UnitName Value="ZXing.Common.GridSampler"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.Common.PerspectiveTransform.pas"/>
+        <UnitName Value="ZXing.Common.PerspectiveTransform"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.DecodeHintType.pas"/>
+        <UnitName Value="ZXing.DecodeHintType"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.DecoderResult.pas"/>
+        <UnitName Value="ZXing.DecoderResult"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.DefaultGridSampler.pas"/>
+        <UnitName Value="ZXing.DefaultGridSampler"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.EncodeHintType.pas"/>
+        <UnitName Value="ZXing.EncodeHintType"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.Helpers.pas"/>
+        <UnitName Value="ZXing.Helpers"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.MultiFormatReader.pas"/>
+        <UnitName Value="ZXing.MultiFormatReader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.Reader.pas"/>
+        <UnitName Value="ZXing.Reader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.ReadResult.pas"/>
+        <UnitName Value="ZXing.ReadResult"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.ResultMetadataType.pas"/>
+        <UnitName Value="ZXing.ResultMetadataType"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.ResultPoint.pas"/>
+        <UnitName Value="ZXing.ResultPoint"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.ResultPointImplementation.pas"/>
+        <UnitName Value="ZXing.ResultPointImplementation"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ZXing.StringUtils.pas"/>
+        <UnitName Value="ZXing.StringUtils"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ReedSolomon\ZXing.Common.ReedSolomon.GenericGF.pas"/>
+        <UnitName Value="ZXing.Common.ReedSolomon.GenericGF"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\ReedSolomon\ZXing.Common.ReedSolomon.ReedSolomonDecoder.pas"/>
+        <UnitName Value="ZXing.Common.ReedSolomon.ReedSolomonDecoder"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\Detector\ZXing.Common.Detector.MathUtils.pas"/>
+        <UnitName Value="ZXing.Common.Detector.MathUtils"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Common\Detector\ZXing.Common.Detector.WhiteRectangleDetector.pas"/>
+        <UnitName Value="ZXing.Common.Detector.WhiteRectangleDetector"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Filtering\ZXing.BaseLuminanceSource.pas"/>
+        <UnitName Value="ZXing.BaseLuminanceSource"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Filtering\ZXing.Binarizer.pas"/>
+        <UnitName Value="ZXing.Binarizer"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Filtering\ZXing.BinaryBitmap.pas"/>
+        <UnitName Value="ZXing.BinaryBitmap"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Filtering\ZXing.GlobalHistogramBinarizer.pas"/>
+        <UnitName Value="ZXing.GlobalHistogramBinarizer"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Filtering\ZXing.HybridBinarizer.pas"/>
+        <UnitName Value="ZXing.HybridBinarizer"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Filtering\ZXing.InvertedLuminanceSource.pas"/>
+        <UnitName Value="ZXing.InvertedLuminanceSource"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Filtering\ZXing.LuminanceSource.pas"/>
+        <UnitName Value="ZXing.LuminanceSource"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\Filtering\ZXing.RGBLuminanceSource.pas"/>
+        <UnitName Value="ZXing.RGBLuminanceSource"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\ZXing.Datamatrix.DataMatrixReader.pas"/>
+        <UnitName Value="ZXing.Datamatrix.DataMatrixReader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\ZXing.QrCode.QRCodeReader.pas"/>
+        <UnitName Value="ZXing.QrCode.QRCodeReader"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.Datamatrix.Internal.BitMatrixParser.pas"/>
+        <UnitName Value="ZXing.Datamatrix.Internal.BitMatrixParser"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.Datamatrix.Internal.DataBlock.pas"/>
+        <UnitName Value="ZXing.Datamatrix.Internal.DataBlock"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.Datamatrix.Internal.DecodedBitStreamParser.pas"/>
+        <UnitName Value="ZXing.Datamatrix.Internal.DecodedBitStreamParser"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.Datamatrix.Internal.Decoder.pas"/>
+        <UnitName Value="ZXing.Datamatrix.Internal.Decoder"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.Datamatrix.Internal.Version.pas"/>
+        <UnitName Value="ZXing.Datamatrix.Internal.Version"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.QrCode.Internal.BitMatrixParser.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.BitMatrixParser"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.QrCode.Internal.DataBlock.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.DataBlock"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.QrCode.Internal.DataMask.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.DataMask"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.QrCode.Internal.DecodedBitStreamParser.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.DecodedBitStreamParser"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.QrCode.Internal.Decoder.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.Decoder"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.QrCode.Internal.ErrorCorrectionLevel.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.ErrorCorrectionLevel"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.QrCode.Internal.FormatInformation.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.FormatInformation"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.QrCode.Internal.Mode.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.Mode"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.QrCode.Internal.QRCodeDecoderMetaData.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.QRCodeDecoderMetaData"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Decoder\ZXing.QrCode.Internal.Version.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.Version"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Detector\ZXing.Datamatrix.Internal.Detector.pas"/>
+        <UnitName Value="ZXing.Datamatrix.Internal.Detector"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Detector\ZXing.QrCode.Internal.AlignmentPattern.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.AlignmentPattern"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Detector\ZXing.QrCode.Internal.AlignmentPatternFinder.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.AlignmentPatternFinder"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Detector\ZXing.QrCode.Internal.AlignmentPatternImplementation.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.AlignmentPatternImplementation"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Detector\ZXing.QrCode.Internal.Detector.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.Detector"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Detector\ZXing.QrCode.Internal.FinderPattern.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.FinderPattern"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Detector\ZXing.QrCode.Internal.FinderPatternFinder.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.FinderPatternFinder"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Detector\ZXing.QrCode.Internal.FinderPatternImplementation.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.FinderPatternImplementation"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\Lib\Classes\2D Barcodes\Detector\ZXing.QrCode.Internal.FinderPatternInfo.pas"/>
+        <UnitName Value="ZXing.QrCode.Internal.FinderPatternInfo"/>
+      </Item>
+    </Files>
+    <RequiredPkgs>
+      <Item>
+        <PackageName Value="LCLBase"/>
+      </Item>
+      <Item>
+        <PackageName Value="FCL"/>
+      </Item>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
