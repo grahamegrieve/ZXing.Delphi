@@ -44,11 +44,10 @@ type
 
     procedure SetResultPointEvent(const AValue: TResultPointCallback);
   public
+    constructor Create(const format: TBarcodeFormat; Hints: THints);
     destructor Destroy; override;
 
     function Scan(const pBitmapForScan: TBitmap): TReadResult;
-    constructor Create(const format: TBarcodeFormat;
-      Hints: THints);
 
     property OnResultPoint: TResultPointCallback read FResultPointEvent
       write SetResultPointEvent;

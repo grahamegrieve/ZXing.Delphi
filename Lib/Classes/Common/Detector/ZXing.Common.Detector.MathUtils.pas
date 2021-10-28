@@ -81,7 +81,7 @@ end;
 class function TMathUtils.Asr(Value: Int64; ShiftBits: integer): Int64;
 begin
   result := Value shr ShiftBits;
-  if (QWord(Value) and $8000000000000000) > 0 then
+  if (Uint64(Value) and $8000000000000000) > 0 then
     result := result or ($FFFFFFFFFFFFFFFF shl (64 - ShiftBits));
 end;
 
