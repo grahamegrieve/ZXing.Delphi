@@ -31,6 +31,7 @@ uses
 type
 
   TStringUtils = class abstract
+  public
   const
     UTF8 = 'UTF-8';
     EUC_JP = 'EUC-JP';

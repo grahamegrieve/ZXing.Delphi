@@ -52,6 +52,7 @@ type
   end;
 
  TBitArrayHelpers = class
+ public
     class function CreateBitArray:IBitArray; overload;
     class function CreateBitArray(const Size: Integer):IBitArray; overload;
  end;
