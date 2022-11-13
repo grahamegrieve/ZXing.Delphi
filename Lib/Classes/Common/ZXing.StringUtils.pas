@@ -35,6 +35,7 @@ type
     UTF8 = 'UTF-8';
     EUC_JP = 'EUC-JP';
     ISO88591 = 'ISO-8859-1';
+  private
     class procedure ClassInit;
     class var ASSUME_SHIFT_JIS: boolean;
     class var PLATFORM_DEFAULT_ENCODING: string;

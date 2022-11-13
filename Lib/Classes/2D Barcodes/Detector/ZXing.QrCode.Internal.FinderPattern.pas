@@ -70,6 +70,7 @@ type
   ///  contains all static methods for using IFinderPattern instances
   /// </summary>
   TFinderPatternHelpers= class(TResultPointHelpers)
+  public
     class function  CreateFinderPattern(const posX, posY, estimatedModuleSize: Single;
       const count: Integer):IFinderPattern; overload;
     class function CreateFinderPattern(const posX, posY, estimatedModuleSize: Single):IFinderPattern; overload;

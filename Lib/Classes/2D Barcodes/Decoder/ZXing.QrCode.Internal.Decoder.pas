@@ -236,7 +236,7 @@ begin
   codeWords := parser.readCodewords;
   if (codeWords = nil) then
   begin
-    FreeAndNil(formatInfo);
+    // FreeAndNil(formatInfo);
     exit;
   end;
 
