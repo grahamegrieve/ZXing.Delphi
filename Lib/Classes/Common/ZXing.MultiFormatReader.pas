@@ -210,43 +210,43 @@ begin
 
     // 1D readers
 
-    if (formats.Contains(TBarcodeFormat.CODE_128)) then
+    if (formats.Contains({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.CODE_128)) then
     begin
       readers.Add(TCode128Reader.Create())
     end;
 
-    if (formats.Contains(TBarcodeFormat.CODE_93)) then
+    if (formats.Contains({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.CODE_93)) then
     begin
       readers.Add(TCode93Reader.Create())
     end;
 
-    if (formats.Contains(TBarcodeFormat.ITF)) then
+    if (formats.Contains({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.ITF)) then
     begin
       readers.Add(TITFReader.Create())
     end;
 
     // 2D readers
-    if (formats.Contains(TBarcodeFormat.QR_CODE)) then
+    if (formats.Contains({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.QR_CODE)) then
     begin
       readers.Add(TQRCodeReader.Create())
     end;
 
-    if formats.Contains(TBarcodeFormat.DATA_MATRIX) then
+    if formats.Contains({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.DATA_MATRIX) then
       readers.Add(TDataMatrixReader.Create);
 
-    if (formats.Contains(TBarcodeFormat.EAN_13)) then
+    if (formats.Contains({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.EAN_13)) then
       readers.Add(TEAN13Reader.Create());
 
-    if (formats.Contains(TBarcodeFormat.EAN_8)) then
+    if (formats.Contains({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.EAN_8)) then
       readers.Add(TEAN8Reader.Create());
 
-    if (formats.Contains(TBarcodeFormat.UPC_A)) then
+    if (formats.Contains({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.UPC_A)) then
       readers.Add(TUPCAReader.Create());
 
-    if (formats.Contains(TBarcodeFormat.UPC_E)) then
+    if (formats.Contains({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.UPC_E)) then
       readers.Add(TUPCEReader.Create());
 
-    if (formats.Contains(TBarcodeFormat.CODE_39)) then
+    if (formats.Contains({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.CODE_39)) then
     begin
       useCode39CheckDigit := hints.ContainsKey
         (TDecodeHintType.ASSUME_CODE_39_CHECK_DIGIT) and

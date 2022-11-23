@@ -110,7 +110,7 @@ begin
     TResultPointHelpers.CreateResultPoint((extensionStartRange[0] + extensionStartRange[1]) div 2, rowNumber),
     TResultPointHelpers.CreateResultPoint(ending, rowNumber));
 
-  extensionResult := TReadResult.Create(resultString, nil, resultPoints, TBarcodeFormat.UPC_EAN_EXTENSION);
+  extensionResult := TReadResult.Create(resultString, nil, resultPoints, {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.UPC_EAN_EXTENSION);
   if (extensionData <> nil)
   then
      extensionResult.putAllMetadata(extensionData);

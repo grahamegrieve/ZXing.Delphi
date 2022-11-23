@@ -691,7 +691,7 @@ begin
   end;
 
   result := TReadResult.Create(aResult, rawBytes, resultPoints,
-    TBarcodeFormat.CODE_128);
+    {$IFNDEF FPC}TBarcodeFormat.{$ENDIF}CODE_128);
 end;
 
 initialization

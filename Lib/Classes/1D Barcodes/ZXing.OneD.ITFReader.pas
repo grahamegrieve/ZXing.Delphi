@@ -230,7 +230,7 @@ begin
   end;
 
   Result := TReadResult.Create(stringResult, nil, resultPoints,
-    TBarcodeFormat.ITF);
+    {$IFNDEF FPC}TBarcodeFormat.{$ENDIF}ITF);
 end;
 
 class function TITFReader.decodeDigit(counters: TArray<Integer>;

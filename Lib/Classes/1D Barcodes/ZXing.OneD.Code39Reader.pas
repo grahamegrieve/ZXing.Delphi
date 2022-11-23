@@ -325,7 +325,7 @@ begin
   resultPoints := [resultPointLeft, resultPointRight];
 
   Result := TReadResult.Create(resultString, nil, resultPoints,
-    TBarcodeFormat.CODE_39);
+    {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.CODE_39);
 
 end;
 

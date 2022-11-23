@@ -179,7 +179,7 @@ end;
 
 function TEAN13Reader.BarcodeFormat: TBarcodeFormat;
 begin
-  Result := TBarcodeFormat.EAN_13;
+  Result := {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.EAN_13;
 end;
 
 class function TEAN13Reader.determineFirstDigit(const resultString

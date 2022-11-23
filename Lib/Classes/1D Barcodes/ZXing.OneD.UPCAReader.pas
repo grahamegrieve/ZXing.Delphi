@@ -113,7 +113,7 @@ end;
 
 function TUPCAReader.BarcodeFormat: TBarcodeFormat;
 begin
-  result := TBarcodeFormat.UPC_A;
+  result := {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.UPC_A;
 end;
 
 class function TUPCAReader.maybeReturnResult(pResult: TReadResult): TReadResult;
@@ -125,7 +125,7 @@ begin
   if pResult.Text[1]='0' then
   begin
     pResult.text := copy(pResult.text, 2, length(pResult.text));
-    pResult.BarcodeFormat := TBarcodeFormat.UPC_A;
+    pResult.BarcodeFormat := {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.UPC_A;
   end;
   {$else}
 {$ZEROBASEDSTRINGS ON}

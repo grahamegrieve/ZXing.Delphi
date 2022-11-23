@@ -164,7 +164,7 @@ begin
     {$endif}
     else
       Result := TReadResult.Create(DecoderResult.Text, DecoderResult.RawBytes,
-        points, TBarcodeFormat.DATA_MATRIX);
+        points, {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.DATA_MATRIX);
 
 
     if (DecoderResult <> nil) then

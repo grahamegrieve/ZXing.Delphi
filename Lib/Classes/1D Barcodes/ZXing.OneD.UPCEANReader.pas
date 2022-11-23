@@ -586,7 +586,7 @@ begin
   end;
 
   case format of
-    TBarcodeFormat.EAN_13, TBarcodeFormat.UPC_A:
+    {$IFNDEF FPC}TBarcodeFormat.{$ENDIF}EAN_13, {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.UPC_A:
       begin
         countryID := eanManSupport.lookupCountryIdentifier(resultString);
         if (countryID <> '') then

@@ -209,7 +209,7 @@ end;
 
 function TUPCEReader.BarcodeFormat: TBarcodeFormat;
 begin
-  Result := TBarcodeFormat.UPC_E;
+  Result := {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.UPC_E;
 end;
 
 class procedure TUPCEReader.DoInitialize;

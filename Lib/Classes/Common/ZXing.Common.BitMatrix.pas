@@ -476,7 +476,7 @@ end;
 
 function TBitMatrix.ToBitmap: TBitmap;
 begin
-  Result := ToBitmap(TBarcodeFormat.CODE_128, '')
+  Result := ToBitmap({$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.CODE_128, '')
 end;
 
 end.

@@ -62,7 +62,7 @@ implementation
 
 function TEAN8Reader.BarcodeFormat: TBarcodeFormat;
 begin
-  result := TBarcodeFormat.EAN_8;
+  result := {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.EAN_8;
 end;
 
 class procedure TEAN8Reader.DoFinalize;

@@ -127,7 +127,7 @@ begin
   if FHints.ContainsKey(ZXing.DecodeHintType.ENABLE_INVERSION) then
     FEnableInversion := true;
 
-  if format <> TBarcodeFormat.Auto then
+  if format <> {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.Auto then
   begin
     if (FHints.TryGetValue(ZXing.DecodeHintType.POSSIBLE_FORMATS, o)) then
       listFormats := o as TBarcodeFormatList

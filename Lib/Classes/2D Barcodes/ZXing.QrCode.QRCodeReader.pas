@@ -199,7 +199,7 @@ begin
         data.applyMirroredCorrection(points);
 
       Result := TReadResult.Create(DecoderResult.Text, DecoderResult.RawBytes,
-        points, TBarcodeFormat.QR_CODE);
+        points, {$IFNDEF FPC}TBarcodeFormat{$ELSE}ZXing.BarCodeFormat{$ENDIF}.QR_CODE);
 
       byteSegments := DecoderResult.byteSegments;
 
